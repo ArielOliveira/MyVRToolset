@@ -1,5 +1,7 @@
 using UnityEngine;
 using Arielado.Math.Primitives;
+using UnityEditor;
+using UnityEditorInternal;
 
 [ExecuteAlways]
 public class VectorHashBehaviour : MonoBehaviour {

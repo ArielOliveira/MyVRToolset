@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Arielado.Math.Primitives;
+using UnityEditor;
 using UnityEngine;
 
-namespace Arielado {
+namespace Arielado.Graphs {
     [RequireComponent(typeof(MeshFilter))]
     public class MeshGraphBaker : MonoBehaviour {
         [SerializeField] private MeshFilter meshFilter;
@@ -22,6 +25,12 @@ namespace Arielado {
         }
 
         public void BuildGraph() {
+            if (!Directory.Exists(Paths.GetPersistentDir(Paths.MESH_GRAPHS)))
+                Directory.CreateDirectory(Paths.GetPersistentDir(Paths.MESH_GRAPHS));
+
+            if (!Directory.Exists(Paths.GetPersistentDir(Paths.TRIANGLE_GRAPHS)))
+                Directory.CreateDirectory(Paths.GetPersistentDir(Paths.TRIANGLE_GRAPHS));
+
             if (useSharedEdges)
                 BuildGraphUsingSharedEdges();
             else 
@@ -51,6 +60,9 @@ namespace Arielado {
             Dictionary<int, HashSet<int>> verticesToTriangles = new Dictionary<int, HashSet<int>>();
             triangleNeighbours = new Dictionary<int, HashSet<int>>();
 
+            Triangle[] triangles = new Triangle[_Mesh.triangles.Length/3];
+            TriangleNode[] triangleNodes = new TriangleNode[_Mesh.triangles.Length/3];
+
             int[] verticeGroup = new int[3];
 
             for (int j = 0; j < _Mesh.triangles.Length; j += 3) {
@@ -73,7 +85,17 @@ namespace Arielado {
                 MapVertice(verticesToTriangles, verticeGroup[2], triangleIndex);
 
                 ConnectTriangles(verticesToTriangles, verticeGroup, triangleIndex);
+
+                triangles[triangleIndex] = new Triangle(v0, v1, v2);
             }
+
+            foreach (var triangle in triangleNeighbours)
+                triangleNodes[triangle.Key] = new TriangleNode(triangle.Key, triangle.Value.ToArray());
+
+            MeshTriangleGraph graph = new MeshTriangleGraph(triangles, triangleNodes);
+            string graphToJson = JsonUtility.ToJson(graph);
+
+            File.WriteAllText(Paths.GetPersistentDir(Paths.TRIANGLE_GRAPHS) + $"{_Mesh.name}.json", graphToJson);
         }
 
         public void BuildGraphUsingSharedEdges() {
@@ -84,6 +106,9 @@ namespace Arielado {
             triangleNeighbours = new Dictionary<int, HashSet<int>>();
 
             Line[] edgeGroup = new Line[3];
+
+            Triangle[] triangles = new Triangle[_Mesh.triangles.Length/3];
+            TriangleNode[] triangleNodes = new TriangleNode[_Mesh.triangles.Length/3];
 
             for (int i = 0; i < _Mesh.triangles.Length; i += 3) {
                 int triangleIndex = i/3;
@@ -117,7 +142,19 @@ namespace Arielado {
                 MapEdge(edgeToTriangles, edge2, triangleIndex);
 
                 ConnectTriangles(edgeToTriangles, edgeGroup, triangleIndex);
+
+                triangles[triangleIndex] = new Triangle(v0, v1, v2);
             }
+
+            foreach (var triangle in triangleNeighbours)
+                triangleNodes[triangle.Key] = new TriangleNode(triangle.Key, triangle.Value.ToArray());
+
+            MeshTriangleGraph graph = new MeshTriangleGraph(triangles, triangleNodes);
+            string graphToJson = JsonUtility.ToJson(graph);
+
+            Debug.Log(graph.triangles[0].v0);
+
+            File.WriteAllText(Paths.GetPersistentDir(Paths.TRIANGLE_GRAPHS) + $"{_Mesh.name}.json", graphToJson);
         }
 
         private void MapVertice(Dictionary<int, HashSet<int>> verticesToTriangles, int vertice, int triangle) {

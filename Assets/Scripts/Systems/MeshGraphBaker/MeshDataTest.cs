@@ -19,7 +19,6 @@ public class MeshDataTest : MonoBehaviour {
 
         readingIndex = triangleIndex * 3;
         readingIndex = Mathf.Clamp(triangleIndex, 0, (triangleCount-1)*3);
-        
 
         v0 = m.triangles[readingIndex];
         v1 = m.triangles[readingIndex+1];

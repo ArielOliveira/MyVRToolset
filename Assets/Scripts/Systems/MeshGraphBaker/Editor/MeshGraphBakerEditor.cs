@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 
-namespace Arielado {
+namespace Arielado.Graphs {
     [CustomEditor(typeof(MeshGraphBaker))]
     public class MeshGraphBakerEditor : Editor {
         [SerializeField] private bool displayReference, displayReferencePerTriangle, displayGraph;

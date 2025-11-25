@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Arielado.Math.Primitives {
     public struct Line : IEquatable<Line> {
-        private readonly Vector3 p0, p1;
-        private readonly Vector3 direction;
-        private readonly float length;
+        public Vector3 p0, p1;
+        public Vector3 direction;
+        public float length;
 
         public Line(Vector3 p0, Vector3 p1) {
             this.p0 = p0;
@@ -16,13 +16,6 @@ namespace Arielado.Math.Primitives {
             length = dir.magnitude;
             direction = dir.normalized;
         }
-
-        public Vector3 P0 => p0;
-        public Vector3 P1 => p1;
-
-        public Vector3 Direction => direction;
-        public float Length => length;
-
         public override int GetHashCode() => 
             ((p0 + p1) / 2f).GetHashCode(); 
 
@@ -38,9 +31,11 @@ namespace Arielado.Math.Primitives {
             (p0 == other.p1 && p1 == other.p0);    
             
     }
+
+    [Serializable]
     public struct Triangle {
-        private readonly Vector3 v0, v1, v2;
-        private readonly Vector3 normal, normalScaled;
+        public Vector3 v0, v1, v2;
+        public Vector3 normal, normalScaled;
         public Triangle(Vector3 v0, Vector3 v1, Vector3 v2) {
             this.v0 = v0;
             this.v1 = v1;
@@ -49,12 +44,6 @@ namespace Arielado.Math.Primitives {
             normalScaled = Vector3.Cross(v1 - v0, v2 - v0);
             normal = normalScaled.normalized;
         }
-
-        public Vector3 V0 => v0;
-        public Vector3 V1 => v1;
-        public Vector3 V2 => v2;
-        public Vector3 Normal => normal;
-        public Vector3 NormalScaled => normalScaled;
 
         public static bool Intersects(Vector3 origin, Vector3 dir, 
                                       Triangle tri,
@@ -66,8 +55,8 @@ namespace Arielado.Math.Primitives {
     }
 
     public struct TriangleIntersectionData {
-        private readonly Vector3 intersection;
-        private readonly float u, v, w, t;
+        public Vector3 intersection;
+        public float u, v, w, t;
 
         public TriangleIntersectionData(Vector3 intersection, float u, float v, float w, float t) {
             this.intersection = intersection;
@@ -76,11 +65,5 @@ namespace Arielado.Math.Primitives {
             this.w = w;
             this.t = t;
         }
-
-        public Vector3 Intersection => intersection;
-        public float U => u;
-        public float V => v;
-        public float W => w;
-        public float T => t;
     }
 }
