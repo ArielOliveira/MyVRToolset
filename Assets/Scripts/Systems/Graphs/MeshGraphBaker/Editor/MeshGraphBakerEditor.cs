@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
@@ -5,9 +6,12 @@ using System.Collections.Generic;
 namespace Arielado.Graphs {
     [CustomEditor(typeof(MeshGraphBaker))]
     public class MeshGraphBakerEditor : Editor {
-        [SerializeField] private bool displayReference, displayReferencePerTriangle, displayGraph;
+        [SerializeField] private bool displayReference, displayReferencePerTriangle, displayGraph, displayPath;
         [SerializeField] private int triangleIndex, referenceTriangleIndex;
+        [SerializeField] private int start, goal;
         [SerializeField] private float debugGraphicRadius = 0.05f; 
+
+        [SerializeField] private List<Vector3> path = new List<Vector3>();
 
         [SerializeField] private int triangleNeighbours = 0;
         private void OnEnable() {
@@ -22,6 +26,7 @@ namespace Arielado.Graphs {
             displayReference = EditorGUILayout.Toggle("Display Reference", displayReference);
             displayReferencePerTriangle = EditorGUILayout.Toggle("Display Reference Per Triangle", displayReferencePerTriangle);
             displayGraph = EditorGUILayout.Toggle("Display Graph", displayGraph);
+            displayPath = EditorGUILayout.Toggle("Display Path", displayPath);
             debugGraphicRadius = EditorGUILayout.Slider("Debug Graphic Radius", debugGraphicRadius, 0.01f, 2f);
             
             triangleIndex = EditorGUILayout.IntField("Triangle Index", triangleIndex);
@@ -30,8 +35,28 @@ namespace Arielado.Graphs {
             referenceTriangleIndex = EditorGUILayout.IntField("Reference Triangle Index", referenceTriangleIndex);
             referenceTriangleIndex = Mathf.Clamp(referenceTriangleIndex, 0, t._Mesh != null ? t._Mesh.triangles.Length-1 : 0);
 
+            start = EditorGUILayout.IntField("Search Start Index", start);
+            start = Mathf.Clamp(start, 0, t._Mesh != null ? (t._Mesh.triangles.Length/3)-1 : 0);
+
+            goal = EditorGUILayout.IntField("Search Goal Index", goal);
+            goal = Mathf.Clamp(goal, 0, t._Mesh != null ? (t._Mesh.triangles.Length/3)-1 : 0);
+
             if (GUILayout.Button("Build Graph"))
                 t.BuildGraph();
+
+            if (GUILayout.Button("Search Path")) {
+                if (t._Mesh == null) return;
+
+                
+                string filePath = Paths.GetPersistentDir(Paths.TRIANGLE_GRAPHS + t._Mesh.name + ".json");
+                if (!File.Exists(filePath)) { Debug.Log(filePath + " File doesn't exists!"); return; }
+
+                MeshTriangleGraph graph = JsonUtility.FromJson<MeshTriangleGraph>(File.ReadAllText(filePath));
+
+                Debug.Log(graph.triangles.Length);
+
+                AStarSearch.GetPath(graph, t.transform, start, goal, out path);
+            }
 
             GUI.enabled = false;
             EditorGUILayout.IntField("Triangle Neighbour Count: ", triangleNeighbours);
@@ -41,6 +66,7 @@ namespace Arielado.Graphs {
         private void OnSceneGUI() {
             if (displayReference) DisplayReference();
             if (displayGraph) DisplayGraphData();
+            if (displayPath) DisplayPath();
 
             Repaint();
         }
@@ -52,6 +78,25 @@ namespace Arielado.Graphs {
           
             for (int i = 0; i < mesh.triangles.Length; i += 3) {
                 RenderTriangle(mesh, i);
+            }
+        }
+
+        private void DisplayPath() {
+            if (path == null || path.Count == 0) return;
+
+            if (path.Count > 1) {
+                for (int i = 0; i < path.Count-1; i++) {
+                    Handles.color = Color.blue;
+                    Handles.DrawLine(path[i], path[i+1]);
+
+                    Handles.color = Color.yellow;    
+                    Handles.DrawWireDisc(path[i], Vector3.up, debugGraphicRadius);
+                    Handles.DrawWireDisc(path[i], Vector3.right, debugGraphicRadius);
+                    Handles.DrawWireDisc(path[i+1], Vector3.up, debugGraphicRadius);
+                    Handles.DrawWireDisc(path[i+1], Vector3.right, debugGraphicRadius);
+                }
+            } else {
+                Handles.DrawSolidDisc(path[0], Vector3.up, debugGraphicRadius);
             }
         }
 
