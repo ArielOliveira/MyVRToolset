@@ -52,6 +52,9 @@ namespace Arielado.Math.Primitives {
             intersection = new TriangleIntersectionData(point, u, v, w, t);
             return isIntersecting;
         }
+
+        public static Vector3 ClosestPointTo(Triangle tri, Vector3 target) =>
+            Geometry.ClosestPointOnTriangle(tri.v0, tri.v1, tri.v2, target);
     }
 
     public struct TriangleIntersectionData {

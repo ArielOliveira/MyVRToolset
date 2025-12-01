@@ -7,6 +7,8 @@ namespace Arielado.Graphs {
         public int Size { get; }
         public bool IsInBounds(int node);
         public int GetNodeIndex(int node);
+        Vector3 GetNodeClosestPointToWS(Transform reference, Vector3 target, int node);
+        Vector3 GetNodeClosestPointToOS(Vector3 target, int node);
         Vector3 GetNodeCenterWS(Transform reference, int node);
         Vector3 GetNodeCenterOS(int node);
         int[] GetNodeNeighbours(int node);
@@ -64,9 +66,12 @@ namespace Arielado.Graphs {
             pathNodes[node] = newValue;
         }
 
-        public double ComputeG(int from, int to, int start) => pathNodes[from].g + 1;
+        public double ComputeG(int from, int to, int start) => pathNodes[from].g;
         public double ComputeH(int from, int to, int start) { 
-            return Vector3.Distance(graph.GetNodeCenterWS(reference, from), graph.GetNodeCenterWS(reference, to)); 
+            Vector3 targetPos = graph.GetNodeCenterWS(reference, to);
+            Vector3 closestPosition = graph.GetNodeClosestPointToWS(reference, targetPos, from);
+            
+            return Vector3.Distance(closestPosition, targetPos); 
         }
     }
 }

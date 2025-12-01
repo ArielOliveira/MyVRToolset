@@ -23,6 +23,23 @@ namespace Arielado.Graphs {
             this.triangleNodes = triangleNodes;
         } 
 
+        public Vector3 GetNodeClosestPointToWS(Transform reference, Vector3 target, int node) {
+            if (!IsInBounds(node)) return Vector3.negativeInfinity;
+
+            Triangle osTriangle = triangles[node];
+            Triangle wsTriangle = new Triangle(reference.TransformPoint(osTriangle.v0), 
+                                               reference.TransformPoint(osTriangle.v1), 
+                                               reference.TransformPoint(osTriangle.v2));
+
+            return Triangle.ClosestPointTo(wsTriangle, target);                                
+        }
+
+        public Vector3 GetNodeClosestPointToOS(Vector3 target, int node) {
+            if (!IsInBounds(node)) return Vector3.negativeInfinity;
+
+            return Triangle.ClosestPointTo(triangles[node], target);
+        }
+
         public Vector3 GetNodeCenterWS(Transform reference, int node) {
             if (reference == null) return Vector3.negativeInfinity;
             if (!IsInBounds(node)) return Vector3.negativeInfinity;

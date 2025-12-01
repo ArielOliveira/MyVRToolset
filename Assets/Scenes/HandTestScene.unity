@@ -897,6 +897,7 @@ GameObject:
   - component: {fileID: 1585762666}
   - component: {fileID: 1585762665}
   - component: {fileID: 1585762664}
+  - component: {fileID: 1585762669}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -917,7 +918,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Arielado.MeshGraphBaker
   meshFilter: {fileID: 1585762667}
-  useSharedEdges: 1
+  useSharedEdges: 0
 --- !u!65 &1585762665
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1010,6 +1011,114 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1585762669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585762663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eae1ebbfd02513245bb9fcf346255ef6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeshGraphSearchDebug
+  meshFilter: {fileID: 1585762667}
+  graph:
+    triangles:
+    - v0: {x: 0.5, y: -0.5, z: 0.5}
+      v1: {x: 0.5, y: 0.5, z: 0.5}
+      v2: {x: -0.5, y: 0.5, z: 0.5}
+      normal: {x: 0, y: 0, z: 1}
+      normalScaled: {x: 0, y: 0, z: 1}
+    - v0: {x: 0.5, y: -0.5, z: 0.5}
+      v1: {x: -0.5, y: 0.5, z: 0.5}
+      v2: {x: -0.5, y: -0.5, z: 0.5}
+      normal: {x: 0, y: 0, z: 1}
+      normalScaled: {x: 0, y: 0, z: 1}
+    - v0: {x: 0.5, y: 0.5, z: 0.5}
+      v1: {x: 0.5, y: 0.5, z: -0.5}
+      v2: {x: -0.5, y: 0.5, z: -0.5}
+      normal: {x: 0, y: 1, z: 0}
+      normalScaled: {x: 0, y: 1, z: 0}
+    - v0: {x: 0.5, y: 0.5, z: 0.5}
+      v1: {x: -0.5, y: 0.5, z: -0.5}
+      v2: {x: -0.5, y: 0.5, z: 0.5}
+      normal: {x: 0, y: 1, z: 0}
+      normalScaled: {x: 0, y: 1, z: 0}
+    - v0: {x: 0.5, y: 0.5, z: -0.5}
+      v1: {x: 0.5, y: -0.5, z: -0.5}
+      v2: {x: -0.5, y: -0.5, z: -0.5}
+      normal: {x: 0, y: 0, z: -1}
+      normalScaled: {x: 0, y: 0, z: -1}
+    - v0: {x: 0.5, y: 0.5, z: -0.5}
+      v1: {x: -0.5, y: -0.5, z: -0.5}
+      v2: {x: -0.5, y: 0.5, z: -0.5}
+      normal: {x: 0, y: 0, z: -1}
+      normalScaled: {x: 0, y: 0, z: -1}
+    - v0: {x: 0.5, y: -0.5, z: -0.5}
+      v1: {x: 0.5, y: -0.5, z: 0.5}
+      v2: {x: -0.5, y: -0.5, z: 0.5}
+      normal: {x: 0, y: -1, z: 0}
+      normalScaled: {x: 0, y: -1, z: 0}
+    - v0: {x: 0.5, y: -0.5, z: -0.5}
+      v1: {x: -0.5, y: -0.5, z: 0.5}
+      v2: {x: -0.5, y: -0.5, z: -0.5}
+      normal: {x: 0, y: -1, z: 0}
+      normalScaled: {x: 0, y: -1, z: 0}
+    - v0: {x: -0.5, y: -0.5, z: 0.5}
+      v1: {x: -0.5, y: 0.5, z: 0.5}
+      v2: {x: -0.5, y: 0.5, z: -0.5}
+      normal: {x: -1, y: 0, z: 0}
+      normalScaled: {x: -1, y: 0, z: 0}
+    - v0: {x: -0.5, y: -0.5, z: 0.5}
+      v1: {x: -0.5, y: 0.5, z: -0.5}
+      v2: {x: -0.5, y: -0.5, z: -0.5}
+      normal: {x: -1, y: 0, z: 0}
+      normalScaled: {x: -1, y: 0, z: 0}
+    - v0: {x: 0.5, y: -0.5, z: -0.5}
+      v1: {x: 0.5, y: 0.5, z: -0.5}
+      v2: {x: 0.5, y: 0.5, z: 0.5}
+      normal: {x: 1, y: 0, z: 0}
+      normalScaled: {x: 1, y: 0, z: 0}
+    - v0: {x: 0.5, y: -0.5, z: -0.5}
+      v1: {x: 0.5, y: 0.5, z: 0.5}
+      v2: {x: 0.5, y: -0.5, z: 0.5}
+      normal: {x: 1, y: 0, z: 0}
+      normalScaled: {x: 1, y: 0, z: 0}
+    triangleNodes:
+    - index: 0
+      neighbours: 01000000030000000b000000
+    - index: 1
+      neighbours: 000000000600000008000000
+    - index: 2
+      neighbours: 03000000050000000a000000
+    - index: 3
+      neighbours: 020000000000000008000000
+    - index: 4
+      neighbours: 05000000070000000a000000
+    - index: 5
+      neighbours: 040000000200000009000000
+    - index: 6
+      neighbours: 01000000070000000b000000
+    - index: 7
+      neighbours: 060000000400000009000000
+    - index: 8
+      neighbours: 010000000300000009000000
+    - index: 9
+      neighbours: 080000000700000005000000
+    - index: 10
+      neighbours: 04000000020000000b000000
+    - index: 11
+      neighbours: 0a0000000600000000000000
+  mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  debugRadius: 0.05
+  start: 0
+  goal: 5
+  currentPathIndex: 5
+  displayGraph: 1
+  displayNodeValues: 1
+  ignoreClosedList: 0
 --- !u!1 &1687419852
 GameObject:
   m_ObjectHideFlags: 0
@@ -1129,7 +1238,6 @@ GameObject:
   - component: {fileID: 1904517660}
   - component: {fileID: 1904517659}
   - component: {fileID: 1904517664}
-  - component: {fileID: 1904517663}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -1230,26 +1338,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1904517663
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1904517658}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59d4764b4568c9d469247cd4b13ad79e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MeshDataTest
-  filter: {fileID: 1904517661}
-  vertexCount: 121
-  triangleCount: 200
-  triangleIndex: 368
-  readingIndex: 368
-  v0: 103
-  v1: 80
-  v2: 92
 --- !u!114 &1904517664
 MonoBehaviour:
   m_ObjectHideFlags: 0

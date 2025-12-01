@@ -29,7 +29,7 @@ namespace Arielado.Graphs {
 
                 if (!closedList.Contains(current.index)) {
                     closedList.Add(current.index);
-                    path.Add(graph.GetNodeCenterWS(reference, current.index));
+                    path.Add(graph.GetNodeClosestPointToWS(reference, graph.GetNodeCenterWS(reference, current.parent), current.index));
                 }
 
                 if (!graph.IsInBounds(current.index)) { Debug.Log("Out of Bounds!"); return false; };
@@ -45,7 +45,7 @@ namespace Arielado.Graphs {
                         double hNew = solver.ComputeH(candidate.index, goal, start);
                         double fNew = gNew + hNew;
 
-                        if (candidate.f == float.PositiveInfinity || candidate.f > fNew) {
+                        if (candidate.f > fNew) {
                             solver.SetNode(candidate.index, new PathNode() { index = candidate.index, parent = current.index, f = fNew, g = gNew, h = hNew } );
                             openList.Add(fNew, solver.GetNode(candidate.index));
                         }
