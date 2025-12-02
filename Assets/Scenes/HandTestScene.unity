@@ -1114,8 +1114,8 @@ MonoBehaviour:
   mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   debugRadius: 0.05
   start: 0
-  goal: 5
-  currentPathIndex: 5
+  goal: 1
+  currentPathIndex: 0
   displayGraph: 1
   displayNodeValues: 1
   ignoreClosedList: 0
@@ -1351,7 +1351,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeshGraphBaker
   meshFilter: {fileID: 1904517661}
-  useSharedEdges: 1
+  useSharedEdges: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
 using System.IO;
+using Arielado.Math.Primitives;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -19,8 +20,9 @@ namespace Arielado.Graphs {
         IGraph Graph { get; }
         PathNode GetNode(int node);
         void SetNode(int node, PathNode newValue);
-        double ComputeG(int from, int to, int start);
-        double ComputeH(int from, int to, int start);
+
+        // Should return F 
+        double ComputeStepCost(int from, int to, int start, int goal, out double g, out double h);
     }
 
     public interface IGraphSolver<T> : IGraphSolver where T : IGraph {}
@@ -66,12 +68,16 @@ namespace Arielado.Graphs {
             pathNodes[node] = newValue;
         }
 
-        public double ComputeG(int from, int to, int start) => pathNodes[from].g;
-        public double ComputeH(int from, int to, int start) { 
-            Vector3 targetPos = graph.GetNodeCenterWS(reference, to);
-            Vector3 closestPosition = graph.GetNodeClosestPointToWS(reference, targetPos, from);
-            
-            return Vector3.Distance(closestPosition, targetPos); 
+        public double ComputeStepCost(int from, int to, int start, int goal, 
+                                      out double g, out double h) {
+            Vector3 goalPos = graph.GetNodeCenterWS(reference, goal);
+            Vector3 candidateClosestPointToGoal = graph.GetNodeClosestPointToWS(reference, goalPos, to);
+            Vector3 currentClosestPointToGoal = graph.GetNodeClosestPointToWS(reference, candidateClosestPointToGoal, from);
+
+            g = Vector3.Distance(candidateClosestPointToGoal, currentClosestPointToGoal);
+            h = Vector3.Distance(candidateClosestPointToGoal, goalPos);
+
+            return g + h;
         }
     }
 }

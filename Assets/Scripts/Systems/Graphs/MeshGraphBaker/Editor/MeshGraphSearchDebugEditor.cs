@@ -13,7 +13,7 @@ namespace Arielado.Graphs {
         SerializedProperty graph;
         SerializedProperty displayGraph, displayNodeValues, ignoreClosedList;
         GraphSolver solver;
-        SortedList<double, PathNode> openList;
+        SortedList<double, int> openList;
         HashSet<int> closedList = new HashSet<int>();
         List<int> path;
 
@@ -41,7 +41,7 @@ namespace Arielado.Graphs {
 
             if (solver == null || openList == null || closedList == null || path == null) ResetSearch();
 
-            PathNode current = openList.First().Value;
+            PathNode current = solver.GetNode(openList.First().Value);
             debugger.CurrentPathIndex = current.index;
             openList.RemoveAt(0);
 
@@ -59,13 +59,16 @@ namespace Arielado.Graphs {
                 PathNode candidate = solver.GetNode(neighbours[i]);
 
                 if (!closedList.Contains(candidate.index)) {
-                    double gNew = solver.ComputeG(current.index, candidate.index, debugger.Start);
-                    double hNew = solver.ComputeH(candidate.index, debugger.Goal, debugger.Start);
-                    double fNew = gNew + hNew;
+                    double fNew = solver.ComputeStepCost(current.index, candidate.index, debugger.Start, debugger.Goal, 
+                                           out double gNew, out double hNew);
 
                     if (candidate.f > fNew) {
                         solver.SetNode(candidate.index, new PathNode() { index = candidate.index, parent = current.index, f = fNew, g = gNew, h = hNew } );
-                        openList.Add(fNew, solver.GetNode(candidate.index));
+
+                        if (openList.ContainsKey(fNew))
+                            openList.Add(fNew + (Random.Range(-1f, 1f) * 0.00001f), candidate.index);
+                        else 
+                            openList.Add(fNew, candidate.index);
                     }
                 }
             }
@@ -76,12 +79,12 @@ namespace Arielado.Graphs {
             MeshGraphSearchDebug debugger = (MeshGraphSearchDebug)target;
 
             solver = new GraphSolver(debugger.transform, meshGraph);
-            openList = new SortedList<double, PathNode>();
+            openList = new SortedList<double, int>();
             closedList = new HashSet<int>();
             path = new List<int>();
 
             solver.SetNode(debugger.Start, new PathNode() { index = debugger.Start, parent = -1, f = 0, g = 0, h = 0 });
-            openList.Add(solver.GetNode(debugger.Start).f, solver.GetNode(debugger.Start));
+            openList.Add(solver.GetNode(debugger.Start).f, debugger.Start);
 
             debugger.CurrentPathIndex = debugger.Start;
         }
@@ -133,7 +136,7 @@ namespace Arielado.Graphs {
 
             Handles.color = goalColor;
             Handles.DrawWireDisc(center, normal, debugger.DebugRadius * 2);
-            Handles.DrawWireDisc(center, Vector3.Cross(normal, Vector3.right), debugger.DebugRadius * 2);            
+            Handles.DrawWireDisc(center, Vector3.Cross(normal, Vector3.up), debugger.DebugRadius * 2);            
         }
 
         private void RenderNodeValues() {
@@ -185,6 +188,10 @@ namespace Arielado.Graphs {
             Vector3 v2 = debugger.transform.TransformPoint(candidateTri.v2);
             Vector3 center = (v0 + v1 + v2) / 3f;
 
+            Vector3 goalPos = solver.Graph.GetNodeCenterWS(debugger.transform, debugger.Goal);
+            Vector3 candidateClosestPointToGoal = solver.Graph.GetNodeClosestPointToWS(debugger.transform, goalPos, candidate);
+            Vector3 currentClosestPointToGoal = solver.Graph.GetNodeClosestPointToWS(debugger.transform, candidateClosestPointToGoal, nodeIndex);
+
             Vector3 closestToCandidate = solver.Graph.GetNodeClosestPointToWS(debugger.transform, center, nodeIndex);
 
             Triangle currentTri = meshGraph.triangles[nodeIndex];
@@ -195,7 +202,7 @@ namespace Arielado.Graphs {
             center = (v0 + v1 + v2) / 3f;
 
             Handles.color = lineColor;
-            Handles.DrawLine(center, closestToCandidate);
+            Handles.DrawLine(center, currentClosestPointToGoal);
 
             GUIStyle style = new GUIStyle();
             style.normal.textColor = !closedList.Contains(candidate) ? fColor : fColorClosed;

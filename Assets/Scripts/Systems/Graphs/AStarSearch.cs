@@ -16,15 +16,15 @@ namespace Arielado.Graphs {
             GraphSolver solver = new GraphSolver(reference, graph);
             solver.SetNode(start, new PathNode() { index = start, parent = -1, f = 0, g = 0, h = 0 });
 
-            SortedList<double, PathNode> openList = new SortedList<double, PathNode>();
+            SortedList<double, int> openList = new SortedList<double, int>();
             HashSet<int> closedList = new HashSet<int>();
 
-            openList.Add(solver.GetNode(start).f, solver.GetNode(start));
+            openList.Add(solver.GetNode(start).f, start);
 
             path = new List<Vector3>(); 
 
             while (openList.Count > 0) {
-                PathNode current = openList.First().Value;
+                PathNode current = solver.GetNode(openList.First().Value);
                 openList.RemoveAt(0);
 
                 if (!closedList.Contains(current.index)) {
@@ -41,13 +41,15 @@ namespace Arielado.Graphs {
                     PathNode candidate = solver.GetNode(neighbours[i]);
 
                     if (!closedList.Contains(candidate.index)) {
-                        double gNew = solver.ComputeG(current.index, candidate.index, start);
-                        double hNew = solver.ComputeH(candidate.index, goal, start);
-                        double fNew = gNew + hNew;
+                        double fNew = solver.ComputeStepCost(current.index, candidate.index, start, goal, out double gNew, out double hNew);
 
                         if (candidate.f > fNew) {
                             solver.SetNode(candidate.index, new PathNode() { index = candidate.index, parent = current.index, f = fNew, g = gNew, h = hNew } );
-                            openList.Add(fNew, solver.GetNode(candidate.index));
+
+                            if (openList.ContainsKey(fNew))
+                                openList.Add(fNew + (Random.Range(-1f, 1f) * 0.00001f), candidate.index);
+                            else 
+                                openList.Add(fNew, candidate.index);
                         }
                     }
                 }
