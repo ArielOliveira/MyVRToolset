@@ -20,6 +20,10 @@ namespace Arielado.Graphs {
         public int Goal => goal;
         public int CurrentPathIndex { get => currentPathIndex; set => currentPathIndex = value;}
         public float DebugRadius => debugRadius;
+
+        public void ReloadGraph() {
+            Setup();
+        }
         private void Setup() {
             meshFilter = GetComponent<MeshFilter>();
 
@@ -32,6 +36,8 @@ namespace Arielado.Graphs {
             start = Mathf.Clamp(start, 0, graph.Size-1);
             goal  = Mathf.Clamp(goal, 0, graph.Size-1);
         }
+
+
 
         private void Update() {
             if (mesh == null || graph.Size == 0) Setup();

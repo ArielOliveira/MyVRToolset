@@ -33,6 +33,9 @@ namespace Arielado.Graphs {
 
             if (GUILayout.Button("Reset Search")) 
                 ResetSearch();
+
+            if (GUILayout.Button("Reload Graph"))
+                ((MeshGraphSearchDebug)target).ReloadGraph();
         }
 
         private void SearchStep() {
@@ -203,6 +206,7 @@ namespace Arielado.Graphs {
 
             Handles.color = lineColor;
             Handles.DrawLine(center, currentClosestPointToGoal);
+            Handles.DrawLine(currentClosestPointToGoal, candidateClosestPointToGoal);
 
             GUIStyle style = new GUIStyle();
             style.normal.textColor = !closedList.Contains(candidate) ? fColor : fColorClosed;

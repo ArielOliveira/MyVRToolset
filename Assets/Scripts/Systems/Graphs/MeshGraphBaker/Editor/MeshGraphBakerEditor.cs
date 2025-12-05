@@ -197,13 +197,13 @@ namespace Arielado.Graphs {
             }
         }
 
-        private void RenderVertice(Mesh mesh, int vertice) {
+        /*private void RenderVertice(Mesh mesh, int vertice) {
             MeshGraphBaker t = (MeshGraphBaker)target;
 
             Vector3 v0 = t.transform.TransformPoint(mesh.vertices[vertice]);
 
             Handles.DrawWireDisc(v0, Vector3.up, debugGraphicRadius);
             Handles.DrawWireDisc(v0, Vector3.right, debugGraphicRadius);
-        }
+        }*/
     }
 }

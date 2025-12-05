@@ -1,15 +1,39 @@
+using System;
 using Arielado.Math.Primitives;
 using UnityEngine;
 
 namespace Arielado.Graphs {
+    public struct TriangleEdge : IEquatable<TriangleEdge> {
+        public int index;
+        public Line line;
+        public int triangle0;
+        public int triangle1;
+
+        public override int GetHashCode() => line.GetHashCode();
+
+        public override bool Equals(object other) {
+            if (other is Line) 
+                return Equals((Line)other);
+
+            return false;
+        }
+
+        public bool Equals(TriangleEdge other) => line.Equals(other.line);
+    }
+
+
     [System.Serializable]
     public struct TriangleNode {
         public int index;
         public int[] neighbours;
+        public int edge0, edge1, edge2;
 
-        public TriangleNode(int index, int[] neighbours) {
+        public TriangleNode(int index, int[] neighbours, int edge0, int edge1, int edge2) {
             this.index = index;
             this.neighbours = neighbours;
+            this.edge0 = edge0;
+            this.edge1 = edge1;
+            this.edge2 = edge2;
         }
     }
 
@@ -17,10 +41,12 @@ namespace Arielado.Graphs {
     public struct MeshTriangleGraph : IGraph {
         public Triangle[] triangles;
         public TriangleNode[] triangleNodes;
+        public TriangleEdge[] edges;
 
-        public MeshTriangleGraph(Triangle[] triangles, TriangleNode[] triangleNodes) {
+        public MeshTriangleGraph(Triangle[] triangles, TriangleNode[] triangleNodes, TriangleEdge[] edges) {
             this.triangles = triangles;
             this.triangleNodes = triangleNodes;
+            this.edges = edges;
         } 
 
         public Vector3 GetNodeClosestPointToWS(Transform reference, Vector3 target, int node) {
@@ -74,7 +100,7 @@ namespace Arielado.Graphs {
         }
 
         public void CopyTo(ref IGraph graph) {
-            graph = new MeshTriangleGraph(this.triangles, this.triangleNodes);
+            graph = new MeshTriangleGraph(this.triangles, this.triangleNodes, this.edges);
         }
     }
 }
