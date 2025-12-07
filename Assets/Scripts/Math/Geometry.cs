@@ -24,7 +24,8 @@ namespace Arielado.Math {
 
             float length = diff.magnitude;
 
-            bool hasIntersected = RayPlaneIntersection(pNormal, pPos, p0, rayDir, out float dist);
+            bool planeResult = RayPlaneIntersection(pNormal, pPos, p0, rayDir, out float dist);
+            bool hasIntersected = planeResult && dist <= length;
 
             dist = Mathf.Clamp(dist, 0, length);
             normalizedLinePoint = Mathf.Abs(dist) / length;
@@ -33,6 +34,29 @@ namespace Arielado.Math {
 
             return hasIntersected;
         }
+
+        public static bool LineTrianglePlaneIntersection(Vector3 lhs, Vector3 rhs, Vector3 pNormal, float trianglePlane, out Vector3 iPoint) {
+            float d0 = Vector3.Dot(pNormal, lhs) + trianglePlane;
+            float d1 = Vector3.Dot(pNormal, rhs) + trianglePlane;
+            
+            iPoint = Vector3.zero;
+
+            bool lhsI = Mathf.Abs(d0) < float.Epsilon;
+            bool rhsI = Mathf.Abs(d1) < float.Epsilon;
+
+            if (lhsI && rhsI) {
+                iPoint = (lhs + rhs) / 2;
+
+                return true;
+            }
+
+            if (d0*d1 > float.Epsilon) return false; // same side of the plane
+
+            float t = d0 / (d0 - d1); // 'time' of intersection point on the segment
+            iPoint = (lhs + t * (rhs - lhs));
+
+            return true;
+        }    
 
          // https://forum.unity.com/threads/how-do-i-find-the-closest-point-on-a-line.340058/
         public static Vector3 LineNearestPoint(Vector3 start, Vector3 end, Vector3 pnt) {
@@ -50,9 +74,9 @@ namespace Arielado.Math {
         public static Vector3 MidPoint(Vector3 lhs, Vector3 rhs) {
             Vector3 midPoint = Vector3.zero;
 
-            midPoint.x = (lhs.x + rhs.x) / 2;
-            midPoint.y = (lhs.y + rhs.y) / 2;
-            midPoint.z = (lhs.z + rhs.z) / 2;
+            midPoint.x = (lhs.x + rhs.x) * 0.5f;
+            midPoint.y = (lhs.y + rhs.y) * 0.5f;
+            midPoint.z = (lhs.z + rhs.z) * 0.5f;
         
             return midPoint;
         }
@@ -101,6 +125,17 @@ namespace Arielado.Math {
             p1 = rotationMat.MultiplyPoint(new Vector3(intersectionX2, intersectionY2, l1.z));
 
             return true;
+        }
+
+        public static bool CircleTriangleIntersection(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 up, Vector3 right, float radius, out Vector3 p0, out Vector3 p1) {
+            p0 = Vector3.negativeInfinity;
+            p1 = Vector3.negativeInfinity;
+
+            Vector3 triCenter = (v0 + v1 + v2) / 3f;
+            Vector3 normalScaled = Vector3.Cross(v1 - v0, v2 - v0);
+            float triPlane = Vector3.Dot(normalScaled, v0);
+
+            return false;
         }
 
         // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates.html
@@ -178,6 +213,17 @@ namespace Arielado.Math {
             float u = 1f - v - w;
 
             return new Vector3(u, v, w);
+        }
+
+        public static bool IsPointInsideTriangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 p) {
+            return SameSide(p, v0, v1, v2) && SameSide(p, v1, v0, v2) && SameSide(p, v2, v0, v1);
+        }
+
+        public static bool SameSide(Vector3 p0, Vector3 p1, Vector3 a, Vector3 b) {
+            Vector3 cp0 = Vector3.Cross(b-a, p0-a);
+            Vector3 cp1 = Vector3.Cross(b-a, p1-a);
+
+            return (Vector3.Dot(cp0, cp1)) >= 0;
         }
 
         public static Vector3 ClosestPointOnTriangle(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 point) {
