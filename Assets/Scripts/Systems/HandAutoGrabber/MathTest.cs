@@ -47,7 +47,6 @@ public class MathTest : MonoBehaviour {
         Vector3 circleTriPlaneNormalized = circleTriPlane.normalized;
         Vector3 circleToTriUp = Vector3.Cross(circleNormal, circleTriPlane).normalized;
     
-        float trianglePlane = -Vector3.Dot(triNormal, v0);
         float normalAngle = Geometry.CirclePointToAngle(Vector3.zero, -triNormal, circleNormal, circleUp);
         Vector3 anglePoint = Geometry.CirclePointFromAngle(normalAngle, circleRadius, circleNormal, circleUp, circleTestPos);
 
@@ -109,6 +108,35 @@ public class MathTest : MonoBehaviour {
 
             // Step 5: If one or none of the points are inside the triangle, check if the triangle 
             // area is within the circle radius.
+            if (!isIP0Valid || !isIP1Valid) {
+                float trianglePlane = -Vector3.Dot(circleNormal, ip0);
+
+                bool ltp0 = Geometry.LineTrianglePlaneIntersection(v0, v1, circleNormal, trianglePlane, out Vector3 lp0);
+                bool ltp1 = Geometry.LineTrianglePlaneIntersection(v0, v2, circleNormal, trianglePlane, out Vector3 lp1);
+                bool ltp2 = Geometry.LineTrianglePlaneIntersection(v1, v2, circleNormal, trianglePlane, out Vector3 lp2);
+
+                if (ltp0 || ltp1 || ltp2) {
+                    Vector3[] points = new Vector3[] { lp0, lp1, lp2 };
+
+                    if (!isIP0Valid) {
+                        Vector3 closest = Geometry.ClosestPointTo(ip0, points);
+                        Gizmos.color = Vector3.Distance(circleTestPos, closest) <= circleRadius ? Color.green : Color.red;
+
+                        Gizmos.DrawSphere(closest, debugRadius);
+                    }
+
+                    if (!isIP1Valid) {
+                        Vector3 closest = Geometry.ClosestPointTo(ip1, points);
+                        Gizmos.color = Vector3.Distance(circleTestPos, closest) <= circleRadius ? Color.green : Color.red;
+                        
+                        Gizmos.DrawSphere(closest, debugRadius);
+                    }
+                } else {
+                    Gizmos.color = Color.red;
+                    Gizmos.DrawSphere(ip0, debugRadius);
+                    Gizmos.DrawSphere(ip1, debugRadius);
+                }
+            }
         }
         /////////////////////////////////////////////////////////////////////////////////////////
 

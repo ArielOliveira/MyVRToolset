@@ -1128,11 +1128,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MathTest
   mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
-  circleTestPos: {x: -4.55, y: 0.24, z: 3.87}
-  circleTestRot: {x: 6.11, y: 97.6, z: 13.8}
+  circleTestPos: {x: -4.7, y: 0.05, z: 4.79}
+  circleTestRot: {x: 0, y: -206.62, z: 0}
   circleRadius: 0.43
   debugRadius: 0.05
-  testTriangle: 3
+  testTriangle: 0
   reloadGraph: 0
 --- !u!33 &1652134799
 MeshFilter:
@@ -1150,7 +1150,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1652134797}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

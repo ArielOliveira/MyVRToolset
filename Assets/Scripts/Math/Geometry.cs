@@ -226,6 +226,22 @@ namespace Arielado.Math {
             return (Vector3.Dot(cp0, cp1)) >= 0;
         }
 
+        public static Vector3 ClosestPointTo(Vector3 target, Vector3[] points) {
+            float distance = float.MaxValue;
+            int selectedIndex = 0;
+
+            for (int i = 0; i < points.Length; i++) {
+                float sqrMagnitude = (target - points[i]).sqrMagnitude;
+
+                if (sqrMagnitude < distance) {
+                    selectedIndex = i;
+                    distance = sqrMagnitude;
+                }
+            }
+
+            return points[selectedIndex];
+        }
+
         public static Vector3 ClosestPointOnTriangle(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 point) {
             // Step 1: Find the normal vector of the plane that contains the triangle
             Vector3 normal = Vector3.Cross(p2 - p1, p3 - p1).normalized;
@@ -300,5 +316,9 @@ namespace Arielado.Math {
 
         public static Vector3 CirclePointFromAngle(float angle, float radius, Vector3 right, Vector3 up, Vector3 origin) =>
              origin + CirclePointFromAngle(angle, radius, right, up);
+
+        public static bool CircleTriangleIntersection() {
+            return false;
+        }
     }
 }
