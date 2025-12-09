@@ -127,17 +127,6 @@ namespace Arielado.Math {
             return true;
         }
 
-        public static bool CircleTriangleIntersection(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 up, Vector3 right, float radius, out Vector3 p0, out Vector3 p1) {
-            p0 = Vector3.negativeInfinity;
-            p1 = Vector3.negativeInfinity;
-
-            Vector3 triCenter = (v0 + v1 + v2) / 3f;
-            Vector3 normalScaled = Vector3.Cross(v1 - v0, v2 - v0);
-            float triPlane = Vector3.Dot(normalScaled, v0);
-
-            return false;
-        }
-
         // https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates.html
         public static bool RayTriangleIntersection(Vector3 origin, Vector3 dir, 
                                                     Vector3 v0, Vector3 v1, Vector3 v2,
@@ -317,8 +306,67 @@ namespace Arielado.Math {
         public static Vector3 CirclePointFromAngle(float angle, float radius, Vector3 right, Vector3 up, Vector3 origin) =>
              origin + CirclePointFromAngle(angle, radius, right, up);
 
-        public static bool CircleTriangleIntersection() {
-            return false;
+        public static bool CircleTriangleIntersection(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 triCenter, Vector3 triNormal, Vector3 cPos, Vector3 cUp, Vector3 cRight, float radius,
+                                                      out Vector3 i0, out Vector3 i1, out bool i0Intersects, out bool i1Intersects) {
+            
+            i0 = Vector3.negativeInfinity;
+            i1 = Vector3.negativeInfinity;
+            i0Intersects = false;
+            i1Intersects = false;
+
+            //////// Step 1: Circle intersects triangle plane ///////////////////////////
+            Vector3 circleTriPlane = Vector3.Cross(triNormal, cRight);
+            Vector3 circleToTriUp = Vector3.Cross(cRight, circleTriPlane);
+
+            float normalAngle = CirclePointToAngle(Vector3.zero, -triNormal, cRight, cUp);
+            Vector3 anglePoint = CirclePointFromAngle(normalAngle, radius, cRight, cUp, cPos);
+
+            // Intersection line crosses circle vertically towards the triangle plane
+            Vector3 l0 = cPos + (circleToTriUp * radius);
+            Vector3 l1 = anglePoint;
+
+            bool triPlaneIntersection = LinePlaneIntersection(l0, l1, triCenter, -triNormal, out Vector3 planeIntersection, out float normalizedLinePoint);
+            
+            //////// Step 2: Find the two points on the circle that intersects the triangle plane
+            if (!triPlaneIntersection) return false;
+
+            // Intersection line crosses circle horizontally along the triangle plane
+            Vector3 segment0 = planeIntersection - (circleTriPlane * radius);
+            Vector3 segment1 = planeIntersection + (circleTriPlane * radius);
+
+            LineCircleIntersection(radius, cPos, segment0, segment1, cRight, cUp, out i0, out i1);
+
+            // Step 3: Find if any of the two points are inside the triangle
+            i0Intersects = IsPointInsideTriangle(v0, v1, v2, i0);
+            i1Intersects = IsPointInsideTriangle(v0, v1, v2, i1);
+
+            if (i0Intersects && i1Intersects) return true;
+
+            // Step 4: Else, find the closest point at the edge of the triangle
+            // and test if is within the circle radius
+            float trianglePlane = -Vector3.Dot(cRight, i0);
+
+            bool ltp0 = LineTrianglePlaneIntersection(v0, v1, cRight, trianglePlane, out Vector3 lp0);
+            bool ltp1 = LineTrianglePlaneIntersection(v0, v2, cRight, trianglePlane, out Vector3 lp1);
+            bool ltp2 = LineTrianglePlaneIntersection(v1, v2, cRight, trianglePlane, out Vector3 lp2);
+
+            Vector3[] edgePoints = new Vector3[] { lp0, lp1, lp2 };
+
+            if (!i0Intersects) {
+                Vector3 closest = ClosestPointTo(i0, edgePoints);
+                i0Intersects = Vector3.Distance(cPos, closest) <= radius;
+
+                i0 = closest;
+            }
+
+            if (!i1Intersects) {
+                Vector3 closest = ClosestPointTo(i1, edgePoints);
+                i1Intersects = Vector3.Distance(cPos, closest) <= radius;
+
+                i1 = closest;
+            }
+
+            return i0Intersects || i1Intersects;
         }
     }
 }

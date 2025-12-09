@@ -6,7 +6,6 @@ using Arielado.Math;
 using Arielado.Math.Primitives;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [ExecuteAlways,
  RequireComponent(typeof(MeshFilter))]
@@ -14,13 +13,14 @@ public class MathTest : MonoBehaviour {
     [SerializeField] private Mesh mesh;
     [SerializeField] private Vector3 circleTestPos, circleTestRot;
     [SerializeField] private float circleRadius, debugRadius;
-
     [SerializeField] private int testTriangle;
+    [SerializeField] private List<int> validTriangles;
 
     [SerializeField] private bool reloadGraph;
-    MeshTriangleGraph graph;
+    private MeshTriangleGraph graph;
+    private Triangle current;
 
-    private void OnDrawGizmos() {
+    /*private void OnDrawGizmos() {
         if (mesh == null) return;
 
         testTriangle = Mathf.Clamp(testTriangle, 0, graph.Size-1);
@@ -151,16 +151,73 @@ public class MathTest : MonoBehaviour {
         
         Handles.color = Color.blue;
         Handles.DrawLine(circleTestPos, circleTestPos + (circleForward * 0.15f));
+    }*/
 
+    private void OnDrawGizmos() {
+        if (mesh == null) return;
+        
+        testTriangle = Mathf.Clamp(testTriangle, 0, graph.Size-1);
 
+        Triangle tri = graph.triangles[testTriangle];
 
-        /*if (Geometry.LineCircleIntersection(circleRadius, circleTestPos, v0, v1, circleNormal, circleUp, out Vector3 p0, out Vector3 p1)) {
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawSphere(p0, debugRadius);
+        Vector3 v0 = transform.TransformPoint(tri.v0);
+        Vector3 v1 = transform.TransformPoint(tri.v1);
+        Vector3 v2 = transform.TransformPoint(tri.v2);
+        Vector3 circleNormal = Quaternion.Euler(circleTestRot) * Vector3.right;
 
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawSphere(p1, debugRadius);
-        }*/
+        bool intersects = ComputeTriangle(testTriangle, ref graph, out Vector3 i0, out Vector3 i1, out bool i0Intersects, out bool i1Intersects);
+
+        Color circle = intersects ? Color.blue : Color.red;
+
+        Color i0Color = i0Intersects ? Color.green : Color.red;
+        Color i1Color = i1Intersects ? Color.green : Color.red;
+
+        Handles.color = circle;
+        Handles.DrawWireDisc(circleTestPos, circleNormal, circleRadius);
+
+        Gizmos.color = i0Color;
+        Gizmos.DrawSphere(i0, debugRadius);
+
+        Gizmos.color = i1Color;
+        Gizmos.DrawSphere(i1, debugRadius);
+
+        Gizmos.color = intersects ? Color.green : Color.red;
+        Gizmos.DrawLineStrip(new Vector3[] { v0, v1, v2 }, true);
+
+        //for (int i = 0; i < graph.GetNodeNeighbours(tr))
+    }
+
+    private void ComputeAllValidTriangles() {
+        HashSet<int> traced = new HashSet<int>();
+        bool shouldContinue = true;
+        int currentTriangle = testTriangle;
+
+        while(shouldContinue) {
+            
+            for (int i = 0; i < graph.GetNodeNeighbours(currentTriangle).Length; i++) {
+                
+            }
+
+        }
+    }
+
+    private bool ComputeTriangle(int triangle, ref MeshTriangleGraph graph, out Vector3 i0, out Vector3 i1, out bool i0Intersects, out bool i1Intersects) {
+        triangle = Mathf.Clamp(triangle, 0, graph.Size-1);
+
+        Triangle tri = graph.triangles[triangle];
+
+        Vector3 v0 = transform.TransformPoint(tri.v0);
+        Vector3 v1 = transform.TransformPoint(tri.v1);
+        Vector3 v2 = transform.TransformPoint(tri.v2);
+        Vector3 triCenter = (v0 + v1 + v2) / 3f;
+        Vector3 triNormal = transform.TransformDirection(tri.normal);
+
+        Quaternion q = Quaternion.Euler(circleTestRot);
+        Vector3 circleUp = q * Vector3.up;
+        Vector3 circleNormal = q * Vector3.right;
+
+        return Geometry.CircleTriangleIntersection(v0, v1, v2, triCenter, triNormal, circleTestPos, circleUp, circleNormal, circleRadius, 
+                                            out i0, out i1, out i0Intersects, out i1Intersects);
     }
 
 

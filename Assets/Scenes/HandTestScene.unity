@@ -607,19 +607,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -6012624077346500938, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.8921941
+      value: -0.9970767
       objectReference: {fileID: 0}
     - target: {fileID: -6012624077346500938, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.451647
+      value: 0.07632543
       objectReference: {fileID: 0}
     - target: {fileID: -6012624077346500938, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.00020755013
+      value: -0.0015581923
       objectReference: {fileID: 0}
     - target: {fileID: -6012624077346500938, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.0021493563
+      value: -0.0031730596
       objectReference: {fileID: 0}
     - target: {fileID: -6012624077346500938, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -635,19 +635,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -5712721285632293740, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.86154085
+      value: -0.9971639
       objectReference: {fileID: 0}
     - target: {fileID: -5712721285632293740, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.5073434
+      value: -0.07329563
       objectReference: {fileID: 0}
     - target: {fileID: -5712721285632293740, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.010483326
+      value: 0.0036179621
       objectReference: {fileID: 0}
     - target: {fileID: -5712721285632293740, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.01549873
+      value: -0.016699858
       objectReference: {fileID: 0}
     - target: {fileID: -5712721285632293740, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -667,19 +667,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 209983296314435184, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.92701
+      value: -0.9866973
       objectReference: {fileID: 0}
     - target: {fileID: 209983296314435184, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.3659791
+      value: -0.07814321
       objectReference: {fileID: 0}
     - target: {fileID: 209983296314435184, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.027396442
+      value: 0.081769876
       objectReference: {fileID: 0}
     - target: {fileID: 209983296314435184, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.07720905
+      value: -0.11677207
       objectReference: {fileID: 0}
     - target: {fileID: 209983296314435184, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -809,13 +809,13 @@ MonoBehaviour:
   - {r: 1, g: 1, b: 1, a: 1}
   fingerLength: 0.08073068
   targetAngles:
-  - -42.4
-  - -21.9
-  - 21.06
+  - 90
+  - 10.8
+  - 9.98
   solvedAngles:
-  - 317.60004
-  - 60.988106
-  - 53.69867
+  - 9.979992
+  - 8.412354
+  - 351.24472
   debugSphereRadius: 0.003
 --- !u!4 &1156848562 stripped
 Transform:
@@ -950,7 +950,8 @@ Transform:
   m_LocalPosition: {x: -1.89163, y: 1.29, z: 0.97}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1833872281}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1585762669
@@ -1128,11 +1129,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MathTest
   mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
-  circleTestPos: {x: -4.7, y: 0.05, z: 4.79}
-  circleTestRot: {x: 0, y: -206.62, z: 0}
+  circleTestPos: {x: -4.66, y: 0.03, z: 4.4}
+  circleTestRot: {x: 0, y: -406, z: 0}
   circleRadius: 0.43
   debugRadius: 0.05
-  testTriangle: 0
+  testTriangle: 1
+  validTriangles: 
   reloadGraph: 0
 --- !u!33 &1652134799
 MeshFilter:
@@ -1157,6 +1159,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1904517662}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1833872280
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1833872281}
+  - component: {fileID: 1833872283}
+  - component: {fileID: 1833872282}
+  m_Layer: 0
+  m_Name: HandGraphIntersectionsTest
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1833872281
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1833872280}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1585762668}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1833872282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1833872280}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e0934e3bc1cfde408e7d79cee3217c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MathTest
+  mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  circleTestPos: {x: -1.64, y: 1.5, z: 0.97}
+  circleTestRot: {x: 0, y: -944.1, z: 0}
+  circleRadius: 1
+  debugRadius: 0.05
+  testTriangle: 3
+  validTriangles: 
+  reloadGraph: 0
+--- !u!33 &1833872283
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1833872280}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1001 &1845194472
 PrefabInstance:
   m_ObjectHideFlags: 0

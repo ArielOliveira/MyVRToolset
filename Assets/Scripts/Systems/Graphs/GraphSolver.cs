@@ -21,6 +21,8 @@ namespace Arielado.Graphs {
         PathNode GetNode(int node);
         void SetNode(int node, PathNode newValue);
 
+        bool IsValid(int from, int to, int start, int goal);
+
         // Should return F 
         double ComputeStepCost(int from, int to, int start, int goal, out double g, out double h);
     }
@@ -67,6 +69,8 @@ namespace Arielado.Graphs {
 
             pathNodes[node] = newValue;
         }
+
+        public bool IsValid(int from, int to, int start, int goal) => true;
 
         public double ComputeStepCost(int from, int to, int start, int goal, 
                                       out double g, out double h) {
