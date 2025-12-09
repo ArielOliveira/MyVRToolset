@@ -1123,17 +1123,17 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1652134797}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6e0934e3bc1cfde408e7d79cee3217c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MathTest
   mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
   circleTestPos: {x: -4.66, y: 0.03, z: 4.4}
-  circleTestRot: {x: 0, y: -406, z: 0}
+  circleTestRot: {x: 0, y: -418.4, z: 0}
   circleRadius: 0.43
   debugRadius: 0.05
-  testTriangle: 1
+  testTriangle: 0
   validTriangles: 
   reloadGraph: 0
 --- !u!33 &1652134799
@@ -1205,11 +1205,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MathTest
   mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-  circleTestPos: {x: -1.64, y: 1.5, z: 0.97}
-  circleTestRot: {x: 0, y: -944.1, z: 0}
+  circleTestPos: {x: -1.79, y: 1.76, z: 1.2}
+  circleTestRot: {x: 0, y: -1119, z: 0}
   circleRadius: 1
   debugRadius: 0.05
-  testTriangle: 3
+  testTriangle: 0
   validTriangles: 
   reloadGraph: 0
 --- !u!33 &1833872283
@@ -1297,7 +1297,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &1904517659
 MeshCollider:
   m_ObjectHideFlags: 0

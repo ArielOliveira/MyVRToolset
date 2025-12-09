@@ -155,22 +155,86 @@ public class MathTest : MonoBehaviour {
 
     private void OnDrawGizmos() {
         if (mesh == null) return;
+        Triangle tri;
+        Vector3 v0, v1, v2, i0, i1;
+        Vector3 circleNormal, circleUp;
+        Quaternion circleRot = Quaternion.Euler(circleTestRot);
+        circleNormal = circleRot * Vector3.right;
+        circleUp = circleRot * Vector3.up;
+
+        GUIStyle style = new GUIStyle();
+        style.normal.textColor = Color.white;
+        style.fontSize = 18;
+
+        Color i0Color, i1Color;
+
+        bool intersects, i0Intersects, i1Intersects;
         
         testTriangle = Mathf.Clamp(testTriangle, 0, graph.Size-1);
 
-        Triangle tri = graph.triangles[testTriangle];
+        int[] neighbours = graph.GetNodeNeighbours(testTriangle);
+        float highestAngle = float.NegativeInfinity;
 
-        Vector3 v0 = transform.TransformPoint(tri.v0);
-        Vector3 v1 = transform.TransformPoint(tri.v1);
-        Vector3 v2 = transform.TransformPoint(tri.v2);
-        Vector3 circleNormal = Quaternion.Euler(circleTestRot) * Vector3.right;
+        int selectedTri = -1;
+        Vector3 selectedPoint = Vector3.negativeInfinity;
 
-        bool intersects = ComputeTriangle(testTriangle, ref graph, out Vector3 i0, out Vector3 i1, out bool i0Intersects, out bool i1Intersects);
+        for (int i = 0; i < neighbours.Length; i++) {
+            tri = graph.triangles[neighbours[i]];
+
+            v0 = transform.TransformPoint(tri.v0);
+            v1 = transform.TransformPoint(tri.v1);
+            v2 = transform.TransformPoint(tri.v2);
+
+            intersects = ComputeTriangle(neighbours[i], ref graph, out i0, out i1, out i0Intersects, out i1Intersects);
+
+            i0Color = i0Intersects ? Color.yellowGreen : Color.orange;
+            i1Color = i1Intersects ? Color.yellowGreen : Color.red;
+
+            float angle0 = Geometry.CirclePointToAngle(circleTestPos, (i0 - circleTestPos).normalized, circleNormal, -circleUp);
+            float angle1 = Geometry.CirclePointToAngle(circleTestPos, (i1 - circleTestPos).normalized, circleNormal, -circleUp);
+
+            if (angle0 > highestAngle || angle1 > highestAngle) {
+                selectedTri = neighbours[i];
+
+                float previous = highestAngle;
+                
+                if (angle0 > angle1) {
+                    selectedPoint = i0;
+                } else {
+                    selectedPoint = i1;
+                }
+
+                highestAngle = Mathf.Max(angle0, angle1);
+
+                Debug.Log(highestAngle + " is higher than " + previous);
+            }
+
+            Handles.Label(i0, angle0.ToString("0.00"), style);
+            Handles.Label(i1, angle1.ToString("0.00"), style);
+
+            Gizmos.color = i0Color;
+            Gizmos.DrawSphere(i0, debugRadius);
+
+            Gizmos.color = i1Color;
+            Gizmos.DrawSphere(i1, debugRadius);
+
+            Gizmos.color = intersects ? Color.yellowGreen : Color.red;
+            Gizmos.DrawLineStrip(new Vector3[] { v0, v1, v2 }, true);
+        }
+
+        tri = graph.triangles[testTriangle];
+
+        v0 = transform.TransformPoint(tri.v0);
+        v1 = transform.TransformPoint(tri.v1);
+        v2 = transform.TransformPoint(tri.v2);
+        circleNormal = Quaternion.Euler(circleTestRot) * Vector3.right;
+
+        intersects = ComputeTriangle(testTriangle, ref graph, out i0, out i1, out i0Intersects, out i1Intersects);
 
         Color circle = intersects ? Color.blue : Color.red;
 
-        Color i0Color = i0Intersects ? Color.green : Color.red;
-        Color i1Color = i1Intersects ? Color.green : Color.red;
+        i0Color = i0Intersects ? Color.green : Color.red;
+        i1Color = i1Intersects ? Color.green : Color.red;
 
         Handles.color = circle;
         Handles.DrawWireDisc(circleTestPos, circleNormal, circleRadius);
@@ -184,7 +248,23 @@ public class MathTest : MonoBehaviour {
         Gizmos.color = intersects ? Color.green : Color.red;
         Gizmos.DrawLineStrip(new Vector3[] { v0, v1, v2 }, true);
 
-        //for (int i = 0; i < graph.GetNodeNeighbours(tr))
+        tri = graph.triangles[selectedTri];
+
+        v0 = transform.TransformPoint(tri.v0);
+        v1 = transform.TransformPoint(tri.v1);
+        v2 = transform.TransformPoint(tri.v2);
+        
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawLineStrip(new Vector3[] { v0, v1, v2 }, true);
+
+        
+
+        Gizmos.color = i0Color;
+        Gizmos.DrawWireSphere(selectedPoint, debugRadius + debugRadius);
+    }
+
+    private void EvaluateTriangleNeighbours() {
+        
     }
 
     private void ComputeAllValidTriangles() {
