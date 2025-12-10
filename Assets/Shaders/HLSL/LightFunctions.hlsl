@@ -26,6 +26,4 @@ half4 ComputeSkybox(float3 viewDirWS) {
     return half4(sunZenithColor + (viewZenithColor * horizonHaze) + (sunViewColor * sunBloom) + sun, 1.0);
 }
 
-void ComputeVertexNormal(float3 normalOS, float4 tangentOS) {}
-
 #endif

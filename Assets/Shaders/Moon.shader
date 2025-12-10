@@ -9,8 +9,7 @@ Shader "Arielado/Moon" {
     SubShader {
         Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
 
-        Pass
-        {
+        Pass {
             HLSLPROGRAM
 
             #pragma vertex vert
@@ -19,16 +18,14 @@ Shader "Arielado/Moon" {
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Assets/Shaders/HLSL/LightFunctions.hlsl"
 
-            struct Attributes
-            {
+            struct Attributes {
                 float4 positionOS : POSITION;
                 float4 tangentOS  : TANGENT;
                 float3 normalOS   : NORMAL;
                 float2 uv         : TEXCOORD0;
             };
 
-            struct Varyings
-            {
+            struct Varyings {
                 float4 positionHCS : SV_POSITION;
                 float2 uv          : TEXCOORD0;
                 float3 positionWS  : TEXCOORD1;
@@ -46,8 +43,7 @@ Shader "Arielado/Moon" {
                 float4 _BumpMap_ST;
             CBUFFER_END
 
-            Varyings vert(Attributes IN)
-            {
+            Varyings vert(Attributes IN) {
                 Varyings OUT;
                 OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
                 OUT.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
@@ -60,8 +56,7 @@ Shader "Arielado/Moon" {
                 return OUT;
             }
 
-            half4 frag(Varyings IN) : SV_Target
-            {
+            half4 frag(Varyings IN) : SV_Target {
                 float3 viewDirWS = normalize(IN.positionWS - GetCameraPositionWS());
 
                 half3 normalMap = UnpackNormal(SAMPLE_TEXTURE2D(_BumpMap, sampler_BumpMap, IN.uv.xy * _BumpMap_ST.xy + _BumpMap_ST.zw));
@@ -71,12 +66,12 @@ Shader "Arielado/Moon" {
                 normalWS = NormalizeNormalPerPixel(normalWS);
 
                 float diffuse = dot(normalWS, _SUN_DIR);
-                float diffuse01 = (diffuse01 + 1) * 0.5;
+                float diffuse01 = (diffuse + 1) * 0.5;
 
-                half4 sky = ComputeSkybox(viewDirWS) * diffuse;
+                half4 sky = ComputeSkybox(viewDirWS);
 
                 half4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * _BaseColor;
-                return color * diffuse;
+                return color * saturate(diffuse) + sky;
             }
             ENDHLSL
         }
