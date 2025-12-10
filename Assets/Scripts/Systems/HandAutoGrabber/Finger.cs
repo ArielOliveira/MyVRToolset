@@ -20,7 +20,7 @@ public class Finger : MonoBehaviour {
 
     [Range(0.001f, 0.1f)] public float debugSphereRadius;
 
-
+    #if UNITY_EDITOR
     private void OnDrawGizmos() {
         if (root == null || tip == null || bones == null || boneLengths == null) return;
 
@@ -77,6 +77,7 @@ public class Finger : MonoBehaviour {
 
         Gizmos.color = Color.white;
     }
+    #endif
 
     public void SetupBones() {
         if (bones == null) bones = new List<Transform>();

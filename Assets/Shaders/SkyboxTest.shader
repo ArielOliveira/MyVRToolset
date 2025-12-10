@@ -1,17 +1,13 @@
-Shader "Custom/SkyboxTestHLSL"
-{
-    Properties
-    {
+Shader "Custom/SkyboxTestHLSL" {
+    Properties {
         [MainColor] _BaseColor("Base Color", Color) = (1, 1, 1, 1)
         [MainTexture] _BaseMap("Base Map", 2D) = "white"
     }
 
-    SubShader
-    {
+    SubShader {
         Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
 
-        Pass
-        {
+        Pass {
             HLSLPROGRAM
 
             #pragma vertex vert
@@ -19,14 +15,12 @@ Shader "Custom/SkyboxTestHLSL"
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            struct Attributes
-            {
+            struct Attributes {
                 float4 positionOS : POSITION;
                 float2 uv : TEXCOORD0;
             };
 
-            struct Varyings
-            {
+            struct Varyings {
                 float4 positionHCS : SV_POSITION;
                 float2 uv : TEXCOORD0;
             };
@@ -39,16 +33,14 @@ Shader "Custom/SkyboxTestHLSL"
                 float4 _BaseMap_ST;
             CBUFFER_END
 
-            Varyings vert(Attributes IN)
-            {
+            Varyings vert(Attributes IN) {
                 Varyings OUT;
                 OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
                 OUT.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
                 return OUT;
             }
 
-            half4 frag(Varyings IN) : SV_Target
-            {
+            half4 frag(Varyings IN) : SV_Target {
                 float remapped = (IN.uv.x * 2) - 1;
                 float range = sqrt(abs(remapped) / (PI / 2));
                

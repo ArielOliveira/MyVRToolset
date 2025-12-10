@@ -1,3 +1,5 @@
+
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using System.IO;
 using Arielado;
@@ -16,7 +18,7 @@ public class MathTest : MonoBehaviour {
     [SerializeField] private int testTriangle;
     [SerializeField] private List<int> validTriangles;
 
-    [SerializeField] private bool reloadGraph;
+    [SerializeField] private bool reloadGraph, goToSelected;
     private MeshTriangleGraph graph;
     private Triangle current;
 
@@ -157,10 +159,12 @@ public class MathTest : MonoBehaviour {
         if (mesh == null) return;
         Triangle tri;
         Vector3 v0, v1, v2, i0, i1;
-        Vector3 circleNormal, circleUp;
+        Vector3 circleNormal, circleForward, circleUp;
         Quaternion circleRot = Quaternion.Euler(circleTestRot);
         circleNormal = circleRot * Vector3.right;
         circleUp = circleRot * Vector3.up;
+        circleForward = circleRot * Vector3.forward;
+
 
         GUIStyle style = new GUIStyle();
         style.normal.textColor = Color.white;
@@ -178,6 +182,12 @@ public class MathTest : MonoBehaviour {
         int selectedTri = -1;
         Vector3 selectedPoint = Vector3.negativeInfinity;
 
+        Gizmos.color = Color.blue;
+        Gizmos.DrawLine(circleTestPos, circleTestPos + (circleForward * 0.1f));
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(circleTestPos, circleTestPos + (circleNormal * 0.1f));
+
         for (int i = 0; i < neighbours.Length; i++) {
             tri = graph.triangles[neighbours[i]];
 
@@ -190,10 +200,10 @@ public class MathTest : MonoBehaviour {
             i0Color = i0Intersects ? Color.yellowGreen : Color.orange;
             i1Color = i1Intersects ? Color.yellowGreen : Color.red;
 
-            float angle0 = Geometry.CirclePointToAngle(circleTestPos, (i0 - circleTestPos).normalized, circleNormal, -circleUp);
-            float angle1 = Geometry.CirclePointToAngle(circleTestPos, (i1 - circleTestPos).normalized, circleNormal, -circleUp);
+            float angle0 = Geometry.CirclePointToAngle(circleTestPos, i0, circleNormal, -circleUp);
+            float angle1 = Geometry.CirclePointToAngle(circleTestPos, i1, circleNormal, -circleUp);
 
-            if (angle0 > highestAngle || angle1 > highestAngle) {
+            if (intersects && (angle0 > highestAngle || angle1 > highestAngle)) {
                 selectedTri = neighbours[i];
 
                 float previous = highestAngle;
@@ -257,10 +267,13 @@ public class MathTest : MonoBehaviour {
         Gizmos.color = Color.magenta;
         Gizmos.DrawLineStrip(new Vector3[] { v0, v1, v2 }, true);
 
-        
-
         Gizmos.color = i0Color;
         Gizmos.DrawWireSphere(selectedPoint, debugRadius + debugRadius);
+
+        if (goToSelected) {
+            testTriangle = selectedTri;
+            goToSelected = false;
+        }
     }
 
     private void EvaluateTriangleNeighbours() {
@@ -315,3 +328,4 @@ public class MathTest : MonoBehaviour {
         }
     }
 }
+#endif
