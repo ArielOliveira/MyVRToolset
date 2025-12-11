@@ -9,6 +9,10 @@
     TEXTURE2D_HALF(_SUN_VIEW_GRAD);        SAMPLER(sampler_SUN_VIEW_GRAD);
 #endif
 
+#if defined(TEXTURECUBE)
+    TEXTURECUBE(_NIGHT_SKY); SAMPLER(sampler_NIGHT_SKY);
+#endif
+
 uniform float3 _SUN_DIR;
 uniform float3 _MOON_DIR;
 

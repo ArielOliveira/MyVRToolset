@@ -57,26 +57,9 @@ Shader "Arielado/SkyboxBakeVisualizer" {
 
             half4 frag(Varyings IN) : SV_Target {
                 float3 viewDirWS = normalize(IN.positionWS - GetCameraPositionWS());
-
-                /*float sunViewDot = dot(_SUN_DIR, viewDirWS);
-                float sunZenithDot = _SUN_DIR.y;
-                float viewZenithDot = viewDirWS.y;
-
-                float sunViewDot01 = (sunViewDot + 1.0) * 0.5;
-                float sunZenithDot01 = (sunZenithDot + 1.0) * 0.5;
                 
-                half3 sunViewColor = SAMPLE_TEXTURE2D(_SunViewGrad, sampler_SunViewGrad, float2(sunZenithDot01, 0.5)).rgb;
-                half3 sunZenithColor = SAMPLE_TEXTURE2D(_SunZenithGrad, sampler_SunZenithGrad, float2(sunZenithDot01, 0.5)).rgb;
-                half3 viewZenithColor = SAMPLE_TEXTURE2D(_ViewZenithGrad, sampler_ViewZenithGrad, float2(sunZenithDot01, 0.5)).rgb;
-
-                half horizonHaze = SAMPLE_TEXTURE2D(_POW_LUT, sampler_POW_LUT, float2(saturate(1 - viewZenithDot), 0.5)).r;
-                half sunBloom = SAMPLE_TEXTURE2D(_POW_LUT, sampler_POW_LUT, float2(saturate(sunViewDot), 0.5)).r;
-
-                float stepRadius = 1 - _SunRadius * _SunRadius;
-                half sun = smoothstep(stepRadius, stepRadius + 0.015, sunViewDot);*/
-                //float sun = step(stepRadius, sunViewDot);
-                
-                return ComputeSkybox(viewDirWS);
+                half sun, moon;
+                return ComputeSkybox(viewDirWS, sun, moon);
             }
             ENDHLSL
         }
