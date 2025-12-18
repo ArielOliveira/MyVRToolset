@@ -8,15 +8,15 @@ public class LightSetter : MonoBehaviour {
     private const float MIN_RADIUS = 0.1f;
     private const float MAX_RADIUS = 0.4f;
 
-    [SerializeField] private Texture2D powLut, sunZenithGrad, viewZenithGrad, sunViewGrad;
-    [SerializeField] private Cubemap nightSky;
+    [SerializeField] private Texture2D powLut, skyGradients;
+    [SerializeField] private Cubemap nightSky, clouds;
     [SerializeField] private Transform moon;
     [SerializeField] private Vector3 moonRotation;
+    [SerializeField, Range(0, 1)] private float nightSkyExposureX, nightSkyExposureY;
     [SerializeField, Range(MIN_RADIUS, MAX_RADIUS)] private float sunRadius = 0.1f;
     [SerializeField, Range(MIN_RADIUS, MAX_RADIUS)] private float moonRadius = 0.1f;
     // Workaround: radius in the moon mesh and skybox mask don't match
     [SerializeField] private Vector2 moonDistanceResize = new Vector2(2.65f, 2.85f);
-    [SerializeField, Range(2f, 500f)] private float moonDistance = 2f;
     [SerializeField, Range(0.01f, 0.5f)] private float debugCircleRadius, debugLineSize;
     private Light _light;
 
@@ -26,10 +26,10 @@ public class LightSetter : MonoBehaviour {
         _MOON_DIR_ID = Shader.PropertyToID("_MOON_DIR"),
         _SUN_RADIUS_ID = Shader.PropertyToID("_SUN_RADIUS"),
         _MOON_RADIUS_ID = Shader.PropertyToID("_MOON_RADIUS"),
-        _SUN_ZENITH_GRAD_ID = Shader.PropertyToID("_SUN_ZENITH_GRAD"),
-        _VIEW_ZENITH_GRAD_ID = Shader.PropertyToID("_VIEW_ZENITH_GRAD"),
-        _SUN_VIEW_GRAD_ID = Shader.PropertyToID("_SUN_VIEW_GRAD"),
-        _NIGHT_SKY_ID = Shader.PropertyToID("_NIGHT_SKY");
+        _SKY_GRADIENTS_ID = Shader.PropertyToID("_SKY_GRADIENTS"),
+        _NIGHT_SKY_ID = Shader.PropertyToID("_NIGHT_SKY"),
+        _NIGHT_SKY_EXPOSURE_ID = Shader.PropertyToID("_NIGHT_SKY_EXPOSURE"),
+        _CLOUDS_ID = Shader.PropertyToID("_CLOUDS");
     
 
     #if UNITY_EDITOR
@@ -52,10 +52,9 @@ public class LightSetter : MonoBehaviour {
 
     private void Start() {
         Shader.SetGlobalTexture(_POW_LUT_ID, powLut);       
-        Shader.SetGlobalTexture(_SUN_ZENITH_GRAD_ID, sunZenithGrad);
-        Shader.SetGlobalTexture(_VIEW_ZENITH_GRAD_ID, viewZenithGrad);
-        Shader.SetGlobalTexture(_SUN_VIEW_GRAD_ID, sunViewGrad);
         Shader.SetGlobalTexture(_NIGHT_SKY_ID, nightSky);
+        Shader.SetGlobalTexture(_SKY_GRADIENTS_ID, skyGradients);
+        Shader.SetGlobalTexture(_CLOUDS_ID, clouds);
     }
 
     private void OnEnable() {
@@ -72,6 +71,7 @@ public class LightSetter : MonoBehaviour {
         if (_light == null) return;
 
         Shader.SetGlobalVector(_SUN_DIR_ID, -transform.forward);
+        Shader.SetGlobalVector(_NIGHT_SKY_EXPOSURE_ID, new Vector2(Mathf.SmoothStep(0, nightSkyExposureY, nightSkyExposureX), nightSkyExposureY));
         Shader.SetGlobalFloat(_SUN_RADIUS_ID, sunRadius);
     }
 
@@ -86,6 +86,8 @@ public class LightSetter : MonoBehaviour {
 
         Quaternion rot = Quaternion.Euler(moonRotation);
 
+        float moonDistance = 100f;
+
         Vector3 moonDir = rot * -Vector3.forward;
         Vector3 moonPos = camPos + moonDir * moonDistance;
 
@@ -93,10 +95,9 @@ public class LightSetter : MonoBehaviour {
 
         float radiusRange = (Mathf.Abs(moonRadius - MIN_RADIUS)) / MAX_RADIUS;
 
-        float factor = Mathf.Lerp(moonDistanceResize.x, moonDistanceResize.y, radiusRange);
-        //float radiusPerDistanceAdjust = Mathf.Lerp(moonDistanceResize.x, moonDistanceResize.y, )
+        float factor = Mathf.SmoothStep(moonDistanceResize.x, moonDistanceResize.y, radiusRange);
 
-        float scale = (moonRadius * factor * moonDistance);
+        float scale = moonRadius * factor * moonDistance;
 
         moon.localScale = Vector3.one * scale;
 

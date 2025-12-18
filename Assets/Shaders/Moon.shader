@@ -7,7 +7,7 @@ Shader "Arielado/Moon" {
     }
 
     SubShader {
-        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType" = "Background" "RenderPipeline" = "UniversalPipeline" "Queue" = "Background" "PreviewType" = "Skybox" }
 
         Pass {
             HLSLPROGRAM
@@ -41,9 +41,17 @@ Shader "Arielado/Moon" {
             CBUFFER_END
 
             Varyings vert(Attributes IN) {
+                float4 clipPos = TransformObjectToHClip(IN.positionOS.xyz);
+
+                #if UNITY_REVERSED_Z
+                    clipPos.z = 1.0e-4f;
+                #else
+                    clipPos.z = clipPos.w - 1.0e-4f;
+                #endif
+
                 Varyings OUT;
-                OUT.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
                 
+                OUT.positionHCS = clipPos;
                 OUT.positionOS = IN.positionOS;
                 OUT.normalOS = IN.normalOS;
                 OUT.tangentOS = IN.tangentOS;
@@ -63,12 +71,13 @@ Shader "Arielado/Moon" {
                 float diffuse = dot(normalWS, _SUN_DIR);
                 float diffuse01 = (diffuse + 1) * 0.5;
                 
-                half sun = (half)0;
-                half moon = (half)0;
-                half4 sky = ComputeSkybox(viewDirWS, sun, moon);
+                SkyData data;
+                
+                half4 sky = ComputeSkybox(viewDirWS, data);
+                half4 color = SAMPLE_TEXTURECUBE(_BaseMap, sampler_BaseMap, IN.normalOS) * _BaseColor * 2.5;
 
-                half4 color = SAMPLE_TEXTURECUBE(_BaseMap, sampler_BaseMap, IN.normalOS) * _BaseColor;
-                return color * saturate(diffuse) + sky;
+                
+                return lerp(sky, color * saturate(diffuse) + sky, 1 - data.horizonHaze);
             }
             ENDHLSL
         }

@@ -215,7 +215,7 @@ namespace Arielado.Math {
             return (Vector3.Dot(cp0, cp1)) >= 0;
         }
 
-        public static Vector3 ClosestPointTo(Vector3 target, Vector3[] points) {
+        public static Vector3 ClosestPointTo(Vector3 target, params Vector3[] points) {
             float distance = float.MaxValue;
             int selectedIndex = 0;
 
@@ -223,6 +223,22 @@ namespace Arielado.Math {
                 float sqrMagnitude = (target - points[i]).sqrMagnitude;
 
                 if (sqrMagnitude < distance) {
+                    selectedIndex = i;
+                    distance = sqrMagnitude;
+                }
+            }
+
+            return points[selectedIndex];
+        }
+
+        public static Vector3 FarthestPointTo(Vector3 target, params Vector3[] points) {
+            float distance = float.MinValue;
+            int selectedIndex = 0;
+
+            for (int i = 0; i < points.Length; i++) {
+                float sqrMagnitude = (target - points[i]).sqrMagnitude;
+
+                if (sqrMagnitude > distance) {
                     selectedIndex = i;
                     distance = sqrMagnitude;
                 }
@@ -273,12 +289,12 @@ namespace Arielado.Math {
         }
 
          public static float CirclePointToAngle(Vector3 origin, Vector3 target, Vector3 right, Vector3 up) {
-            Vector3 centerToPoint = origin - target;
+            Vector3 centerToPoint = (origin - target).normalized;
 
             Quaternion rot = Quaternion.LookRotation(right, up);
             Matrix4x4 rotationMat = Matrix4x4.Rotate(rot);
 
-            centerToPoint = rotationMat.inverse.MultiplyPoint(centerToPoint).normalized;
+            centerToPoint = rotationMat.inverse.MultiplyVector(centerToPoint);
 
             float theta = (Mathf.Atan2(centerToPoint.y, centerToPoint.x) * Mathf.Rad2Deg) + 180f;
 

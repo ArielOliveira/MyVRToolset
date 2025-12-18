@@ -607,19 +607,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -6012624077346500938, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.9970767
+      value: -0.9744306
       objectReference: {fileID: 0}
     - target: {fileID: -6012624077346500938, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.07632543
+      value: 0.22465572
       objectReference: {fileID: 0}
     - target: {fileID: -6012624077346500938, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.0015581923
+      value: -0.0019851166
       objectReference: {fileID: 0}
     - target: {fileID: -6012624077346500938, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.0031730596
+      value: -0.0033001152
       objectReference: {fileID: 0}
     - target: {fileID: -6012624077346500938, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -635,19 +635,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -5712721285632293740, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.9971639
+      value: -0.72123003
       objectReference: {fileID: 0}
     - target: {fileID: -5712721285632293740, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.07329563
+      value: -0.6924358
       objectReference: {fileID: 0}
     - target: {fileID: -5712721285632293740, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.0036179621
+      value: 0.013212154
       objectReference: {fileID: 0}
     - target: {fileID: -5712721285632293740, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.016699858
+      value: -0.013619878
       objectReference: {fileID: 0}
     - target: {fileID: -5712721285632293740, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -667,31 +667,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 209983296314435184, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.9866973
+      value: 0.88357586
       objectReference: {fileID: 0}
     - target: {fileID: 209983296314435184, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.07814321
+      value: -0.46355194
       objectReference: {fileID: 0}
     - target: {fileID: 209983296314435184, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.081769876
+      value: -0.01320805
       objectReference: {fileID: 0}
     - target: {fileID: 209983296314435184, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.11677207
+      value: 0.06510636
       objectReference: {fileID: 0}
     - target: {fileID: 209983296314435184, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: -7.59
+      value: 9.62
       objectReference: {fileID: 0}
     - target: {fileID: 209983296314435184, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 3.954
+      value: -8.355
       objectReference: {fileID: 0}
     - target: {fileID: 209983296314435184, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: -1.53
+      value: 12.768
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 7eff605df5fc69141bad762b74fb9228, type: 3}
       propertyPath: m_Name
@@ -809,13 +809,13 @@ MonoBehaviour:
   - {r: 1, g: 1, b: 1, a: 1}
   fingerLength: 0.08073068
   targetAngles:
-  - 90
-  - 10.8
-  - 9.98
+  - -54.83
+  - -17.65
+  - -15.9
   solvedAngles:
-  - 9.979992
-  - 8.412354
-  - 351.24472
+  - 305.16998
+  - 87.66646
+  - 334.03412
   debugSphereRadius: 0.003
 --- !u!4 &1156848562 stripped
 Transform:
@@ -1133,10 +1133,12 @@ MonoBehaviour:
   circleTestRot: {x: 0, y: -418.4, z: 0}
   circleRadius: 0.43
   debugRadius: 0.05
+  angleTestRot: 0
   testTriangle: 0
   validTriangles: 
   reloadGraph: 0
   goToSelected: 0
+  neighbourCount: 0
 --- !u!33 &1652134799
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1206,14 +1208,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MathTest
   mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-  circleTestPos: {x: -1.99, y: 1.93, z: 1.51}
-  circleTestRot: {x: 0, y: -1.28, z: 0}
+  circleTestPos: {x: -1.84, y: 1.98, z: 1.27}
+  circleTestRot: {x: 0, y: 0, z: 0}
   circleRadius: 1
   debugRadius: 0.05
-  testTriangle: 3
+  angleTestRot: -92.08
+  testTriangle: 0
   validTriangles: 
   reloadGraph: 0
   goToSelected: 0
+  neighbourCount: 3
 --- !u!33 &1833872283
 MeshFilter:
   m_ObjectHideFlags: 0

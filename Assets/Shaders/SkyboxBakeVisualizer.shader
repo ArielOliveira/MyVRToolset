@@ -58,8 +58,8 @@ Shader "Arielado/SkyboxBakeVisualizer" {
             half4 frag(Varyings IN) : SV_Target {
                 float3 viewDirWS = normalize(IN.positionWS - GetCameraPositionWS());
                 
-                half sun, moon;
-                return ComputeSkybox(viewDirWS, sun, moon);
+                SkyData data;
+                return ComputeSkybox(viewDirWS, data);
             }
             ENDHLSL
         }

@@ -14,146 +14,14 @@ using UnityEngine;
 public class MathTest : MonoBehaviour {
     [SerializeField] private Mesh mesh;
     [SerializeField] private Vector3 circleTestPos, circleTestRot;
-    [SerializeField] private float circleRadius, debugRadius;
+    [SerializeField] private float circleRadius, debugRadius, angleTestRot;
     [SerializeField] private int testTriangle;
     [SerializeField] private List<int> validTriangles;
 
     [SerializeField] private bool reloadGraph, goToSelected;
+    [ReadOnly, SerializeField] private int neighbourCount;
     private MeshTriangleGraph graph;
     private Triangle current;
-
-    /*private void OnDrawGizmos() {
-        if (mesh == null) return;
-
-        testTriangle = Mathf.Clamp(testTriangle, 0, graph.Size-1);
-
-        Triangle tri = graph.triangles[testTriangle];
-
-        Vector3 v0 = transform.TransformPoint(tri.v0);
-        Vector3 v1 = transform.TransformPoint(tri.v1);
-        Vector3 v2 = transform.TransformPoint(tri.v2);
-        Vector3 triCenter = (v0 + v1 + v2) / 3f;
-        Vector3 triNormal = transform.TransformDirection(tri.normal);
-
-        Handles.color = Color.white;
-        Gizmos.DrawLineStrip(new Vector3[] { v0, v1, v2}, true);
-        Gizmos.DrawLine(triCenter, triCenter + (triNormal * 0.15f));
-
-        Quaternion q = Quaternion.Euler(circleTestRot);
-        Vector3 circleUp = q * Vector3.up;
-        Vector3 circleForward = q * Vector3.forward;
-        Vector3 circleNormal = q * Vector3.right;
-        
-        //////// Step 1: Circle intersects triangle plane ///////////////////////////
-        Vector3 circleTriPlane = Vector3.Cross(triNormal, circleNormal);
-        Vector3 circleTriPlaneNormalized = circleTriPlane.normalized;
-        Vector3 circleToTriUp = Vector3.Cross(circleNormal, circleTriPlane).normalized;
-    
-        float normalAngle = Geometry.CirclePointToAngle(Vector3.zero, -triNormal, circleNormal, circleUp);
-        Vector3 anglePoint = Geometry.CirclePointFromAngle(normalAngle, circleRadius, circleNormal, circleUp, circleTestPos);
-
-        Vector3 l0 = circleTestPos + (circleToTriUp * circleRadius);
-        Vector3 l1 = anglePoint;
-
-        bool triPlaneIntersection = Geometry.LinePlaneIntersection(l0, l1, triCenter, -triNormal, out Vector3 iPoint, out float normalizedLinePoint);
-
-        Gizmos.color = Color.black;
-        Gizmos.DrawSphere(anglePoint, debugRadius);
-
-        GUIStyle style = new GUIStyle();
-        style.normal.textColor = Color.white;
-        style.fontSize = 14;
-        Handles.Label(anglePoint, normalAngle.ToString("0.00"), style);
-
-        Gizmos.color = Color.yellowGreen;
-        Gizmos.DrawLine(l0, l1);
-
-        Handles.color = Color.yellow;
-        Handles.DrawLine(circleTestPos, circleTestPos + (circleTriPlane * 0.15f));
-        
-        // Step 2: Find Circle-Plane Intersecting Points
-        if (triPlaneIntersection) {
-            Gizmos.DrawSphere(iPoint, debugRadius);
-
-            Vector3 segment0 = iPoint - (circleTriPlaneNormalized * circleRadius);
-            Vector3 segment1 = iPoint + (circleTriPlaneNormalized * circleRadius);
-
-            Handles.color = Color.red;
-            Handles.DrawLine(iPoint, segment0);
-
-            Handles.color = Color.red;
-            Handles.DrawLine(iPoint, segment1);
-
-            Geometry.LineCircleIntersection(circleRadius, circleTestPos, segment0, segment1, circleNormal, circleUp, out Vector3 ip0, out Vector3 ip1);
-
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawSphere(ip0, debugRadius);
-            Gizmos.DrawSphere(ip1, debugRadius);
-
-            float angle0 = Geometry.CirclePointToAngle(circleTestPos, ip0, circleNormal, circleUp);
-            float angle1 = Geometry.CirclePointToAngle(circleTestPos, ip1, circleNormal, circleUp);
-
-            Handles.Label(ip0, angle0.ToString("0.00"), style);
-            Handles.Label(ip1, angle1.ToString("0.00"), style);
-
-            // Step 3: Find if any of the points are inside the triangle
-            bool isIP0Valid = Geometry.IsPointInsideTriangle(v0, v1, v2, ip0);
-            bool isIP1Valid = Geometry.IsPointInsideTriangle(v0, v1, v2, ip1);
-
-            Gizmos.color = Color.green;
-            if (isIP0Valid)
-                Gizmos.DrawSphere(ip0, debugRadius);
-            if (isIP1Valid)
-                Gizmos.DrawSphere(ip1, debugRadius);
-
-            // Step 4: If both points are inside the triangle, stop here and return true.
-
-            // Step 5: If one or none of the points are inside the triangle, check if the triangle 
-            // area is within the circle radius.
-            if (!isIP0Valid || !isIP1Valid) {
-                float trianglePlane = -Vector3.Dot(circleNormal, ip0);
-
-                bool ltp0 = Geometry.LineTrianglePlaneIntersection(v0, v1, circleNormal, trianglePlane, out Vector3 lp0);
-                bool ltp1 = Geometry.LineTrianglePlaneIntersection(v0, v2, circleNormal, trianglePlane, out Vector3 lp1);
-                bool ltp2 = Geometry.LineTrianglePlaneIntersection(v1, v2, circleNormal, trianglePlane, out Vector3 lp2);
-
-                if (ltp0 || ltp1 || ltp2) {
-                    Vector3[] points = new Vector3[] { lp0, lp1, lp2 };
-
-                    if (!isIP0Valid) {
-                        Vector3 closest = Geometry.ClosestPointTo(ip0, points);
-                        Gizmos.color = Vector3.Distance(circleTestPos, closest) <= circleRadius ? Color.green : Color.red;
-
-                        Gizmos.DrawSphere(closest, debugRadius);
-                    }
-
-                    if (!isIP1Valid) {
-                        Vector3 closest = Geometry.ClosestPointTo(ip1, points);
-                        Gizmos.color = Vector3.Distance(circleTestPos, closest) <= circleRadius ? Color.green : Color.red;
-                        
-                        Gizmos.DrawSphere(closest, debugRadius);
-                    }
-                } else {
-                    Gizmos.color = Color.red;
-                    Gizmos.DrawSphere(ip0, debugRadius);
-                    Gizmos.DrawSphere(ip1, debugRadius);
-                }
-            }
-        }
-        /////////////////////////////////////////////////////////////////////////////////////////
-
-        Handles.color = Color.cyan;
-        Handles.DrawWireDisc(circleTestPos, circleNormal, circleRadius);
-
-        Handles.color = Color.green;
-        Handles.DrawLine(circleTestPos, circleTestPos + (circleUp * 0.15f));
-
-        Handles.color = Color.red;
-        Handles.DrawLine(circleTestPos, circleTestPos + (circleNormal * 0.15f));
-        
-        Handles.color = Color.blue;
-        Handles.DrawLine(circleTestPos, circleTestPos + (circleForward * 0.15f));
-    }*/
 
     private void OnDrawGizmos() {
         if (mesh == null) return;
@@ -161,26 +29,74 @@ public class MathTest : MonoBehaviour {
         Vector3 v0, v1, v2, i0, i1;
         Vector3 circleNormal, circleForward, circleUp;
         Quaternion circleRot = Quaternion.Euler(circleTestRot);
-        circleNormal = circleRot * Vector3.right;
-        circleUp = circleRot * Vector3.up;
-        circleForward = circleRot * Vector3.forward;
+        circleNormal = circleRot * -Vector3.right;
+        bool intersects, i0Intersects, i1Intersects;
 
+        
+
+        tri = graph.triangles[testTriangle];
+
+        v0 = transform.TransformPoint(tri.v0);
+        v1 = transform.TransformPoint(tri.v1);
+        v2 = transform.TransformPoint(tri.v2);
+        Vector3 triCenter = (v0 + v1 + v2) / 3f;
+        Vector3 triNormal = transform.TransformDirection(tri.normal);
+
+
+
+        Vector3 circleTriPlane = Vector3.Cross(triNormal, circleNormal);
+        Vector3 circleToTriUp = Vector3.Cross(circleNormal, circleTriPlane);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(circleTestPos + (circleToTriUp * circleRadius), circleTestPos - (circleToTriUp * circleRadius));
+
+        intersects = ComputeTriangle(testTriangle, ref graph, out i0, out i1, out i0Intersects, out i1Intersects);
+
+        Vector3 closest = Geometry.ClosestPointTo(circleTestPos, i0, i1);
+        Vector3 farthest = Geometry.FarthestPointTo(circleTestPos, i0, i1);
+
+        circleUp = circleToTriUp;
+        circleForward = -Vector3.Cross(circleToTriUp, circleNormal);
+        //circleForward = (circleTestPos - farthest).normalized;
+        //circleUp = Vector3.Cross(circleForward, circleNormal);
+
+        Vector3 point = Quaternion.Euler(angleTestRot, 0, 0) * circleForward;
+
+        Gizmos.color = Color.saddleBrown;
+        Gizmos.DrawSphere(circleTestPos + point, debugRadius);
+
+        float upAngle = Geometry.CirclePointToAngle(circleTestPos, circleTestPos + circleUp, circleNormal, circleUp);
+        float downAngle = Geometry.CirclePointToAngle(circleTestPos, circleTestPos - circleUp, circleNormal, circleUp);
+        float forwardAngle = Geometry.CirclePointToAngle(circleTestPos, circleTestPos + circleForward, circleNormal, circleUp);
+        float backAngle = Geometry.CirclePointToAngle(circleTestPos, circleTestPos - circleForward, circleNormal, circleUp);
+        float testAngle = Geometry.CirclePointToAngle(circleTestPos, circleTestPos + point, circleNormal, circleUp);
+        float closestPointAngle = Geometry.CirclePointToAngle(circleTestPos, closest, circleNormal,  circleUp);
 
         GUIStyle style = new GUIStyle();
         style.normal.textColor = Color.white;
         style.fontSize = 18;
 
-        Color i0Color, i1Color;
+        style.normal.textColor = Color.yellow;
+        Handles.Label(circleTestPos + circleUp, upAngle.ToString("0"), style);
+        Handles.Label(circleTestPos - circleUp, downAngle.ToString("0"), style);
+        Handles.Label(circleTestPos + circleForward, forwardAngle.ToString("0"), style);
+        Handles.Label(circleTestPos - circleForward, backAngle.ToString("0"), style);
+        Handles.Label(circleTestPos + point, testAngle.ToString("0"), style);
 
-        bool intersects, i0Intersects, i1Intersects;
+        style.normal.textColor = Color.white;
+
+        Color i0Color, i1Color;
         
         testTriangle = Mathf.Clamp(testTriangle, 0, graph.Size-1);
 
         int[] neighbours = graph.GetNodeNeighbours(testTriangle);
-        float highestAngle = float.NegativeInfinity;
+        neighbourCount = neighbours.Length;
+        float lowestCost = float.PositiveInfinity;
+        float selectedAngle = closestPointAngle;
+
 
         int selectedTri = -1;
-        Vector3 selectedPoint = Vector3.negativeInfinity;
+        Vector3 selectedPoint = closest;
 
         Gizmos.color = Color.blue;
         Gizmos.DrawLine(circleTestPos, circleTestPos + (circleForward * 0.1f));
@@ -200,23 +116,37 @@ public class MathTest : MonoBehaviour {
             i0Color = i0Intersects ? Color.yellowGreen : Color.orange;
             i1Color = i1Intersects ? Color.yellowGreen : Color.red;
 
-            float angle0 = Geometry.CirclePointToAngle(circleTestPos, i0, circleNormal, -circleUp);
-            float angle1 = Geometry.CirclePointToAngle(circleTestPos, i1, circleNormal, -circleUp);
+            float angle0 = Geometry.CirclePointToAngle(circleTestPos, i0, circleNormal, circleUp);
+            float angle1 = Geometry.CirclePointToAngle(circleTestPos, i1, circleNormal, circleUp);
 
-            if (intersects && (angle0 > highestAngle || angle1 > highestAngle)) {
-                selectedTri = neighbours[i];
-
-                float previous = highestAngle;
+            if (intersects) {
                 
-                if (angle0 > angle1) {
-                    selectedPoint = i0;
-                } else {
-                    selectedPoint = i1;
+                float cost0, cost1;
+                cost0 = cost1 = float.PositiveInfinity;
+                
+                if (i0Intersects) {
+                    cost0 = Mathf.Abs(selectedAngle - angle0);
+
+                    if (cost0 < lowestCost) {
+                        selectedTri = neighbours[i];
+                        lowestCost = cost0;
+                        selectedPoint = i0;    
+                        selectedAngle = angle0;
+                    }
                 }
 
-                highestAngle = Mathf.Max(angle0, angle1);
+                if (i1Intersects) {
+                    cost1 = Mathf.Abs(selectedAngle - angle1);
 
-                Debug.Log(highestAngle + " is higher than " + previous);
+                    if (cost1 < lowestCost) {
+                        selectedTri = neighbours[i];
+                        lowestCost = cost1;
+                        selectedPoint = i1;  
+                        selectedAngle = angle1;  
+                    }
+                }
+
+                
             }
 
             Handles.Label(i0, angle0.ToString("0.00"), style);
@@ -231,6 +161,11 @@ public class MathTest : MonoBehaviour {
             Gizmos.color = intersects ? Color.yellowGreen : Color.red;
             Gizmos.DrawLineStrip(new Vector3[] { v0, v1, v2 }, true);
         }
+
+        style.normal.textColor = Color.red;
+        Handles.Label(closest, closestPointAngle.ToString("0.00"), style);
+        style.normal.textColor = Color.magenta;
+        Handles.Label(selectedPoint, selectedAngle.ToString("0.00"), style);
 
         tri = graph.triangles[testTriangle];
 
@@ -258,39 +193,23 @@ public class MathTest : MonoBehaviour {
         Gizmos.color = intersects ? Color.green : Color.red;
         Gizmos.DrawLineStrip(new Vector3[] { v0, v1, v2 }, true);
 
-        tri = graph.triangles[selectedTri];
+        if (selectedTri > 0) {
+            tri = graph.triangles[selectedTri];
 
-        v0 = transform.TransformPoint(tri.v0);
-        v1 = transform.TransformPoint(tri.v1);
-        v2 = transform.TransformPoint(tri.v2);
-        
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawLineStrip(new Vector3[] { v0, v1, v2 }, true);
-
-        Gizmos.color = i0Color;
-        Gizmos.DrawWireSphere(selectedPoint, debugRadius + debugRadius);
-
-        if (goToSelected) {
-            testTriangle = selectedTri;
-            goToSelected = false;
-        }
-    }
-
-    private void EvaluateTriangleNeighbours() {
-        
-    }
-
-    private void ComputeAllValidTriangles() {
-        HashSet<int> traced = new HashSet<int>();
-        bool shouldContinue = true;
-        int currentTriangle = testTriangle;
-
-        while(shouldContinue) {
+            v0 = transform.TransformPoint(tri.v0);
+            v1 = transform.TransformPoint(tri.v1);
+            v2 = transform.TransformPoint(tri.v2);
             
-            for (int i = 0; i < graph.GetNodeNeighbours(currentTriangle).Length; i++) {
-                
-            }
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawLineStrip(new Vector3[] { v0, v1, v2 }, true);
 
+            Gizmos.color = i0Color;
+            Gizmos.DrawWireSphere(selectedPoint, debugRadius + debugRadius);
+
+            if (goToSelected) {
+                testTriangle = selectedTri;
+                goToSelected = false;
+            }
         }
     }
 
