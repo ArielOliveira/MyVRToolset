@@ -1,7 +1,11 @@
-Shader "Arielado/SkyboxTestHLSL" {
+Shader "Arielado/AAStepTest" {
     Properties {
         [MainColor] _BaseColor("Base Color", Color) = (1, 1, 1, 1)
         [MainTexture] _BaseMap("Base Map", 2D) = "white"
+
+        _Softness("Softness", Float) = 0.0
+        _Step("Step", Float) = 1
+        
     }
 
     SubShader {
@@ -14,6 +18,7 @@ Shader "Arielado/SkyboxTestHLSL" {
             #pragma fragment frag
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Assets/Shaders/HLSL/Math.hlsl"
 
             struct Attributes {
                 float4 positionOS : POSITION;
@@ -31,6 +36,8 @@ Shader "Arielado/SkyboxTestHLSL" {
             CBUFFER_START(UnityPerMaterial)
                 half4 _BaseColor;
                 float4 _BaseMap_ST;
+                float _Softness;
+                float _Step;
             CBUFFER_END
 
             Varyings vert(Attributes IN) {
@@ -41,10 +48,9 @@ Shader "Arielado/SkyboxTestHLSL" {
             }
 
             half4 frag(Varyings IN) : SV_Target {
-                float remapped = (IN.uv.x * 2) - 1;
-                float range = sqrt(abs(remapped) / (PI / 2));
+                float stepped = aaStep(_Step - (_Softness * 0.5), IN.uv.x, _Softness);
                
-                return 0.5 + 0.5 * sign(remapped) * range;
+                return half4(stepped.xxx, 1);
             }
             ENDHLSL
         }
