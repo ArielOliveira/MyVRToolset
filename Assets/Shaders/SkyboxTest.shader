@@ -40,11 +40,24 @@ Shader "Arielado/SkyboxTestHLSL" {
                 return OUT;
             }
 
-            half4 frag(Varyings IN) : SV_Target {
+            /*half4 frag(Varyings IN) : SV_Target {
                 float remapped = (IN.uv.x * 2) - 1;
                 float range = sqrt(abs(remapped) / (PI / 2));
                
                 return 0.5 + 0.5 * sign(remapped) * range;
+            }*/
+
+            half4 frag(Varyings IN) : SV_Target {
+                float sunZenithDot = (IN.uv.y * 2) - 1;
+                float viewZenithDot = (IN.uv.y * 2) - 1;
+
+                float red = saturate(dot(float3(0, 0, 1), float3(0, 0, -sunZenithDot)) + 0.2); 
+                
+                
+                float blue = saturate(dot(float3(0, 1, 0), float3(0, sunZenithDot, 0)));
+                float green = (blue * 0.8) + (red * 0.25);
+
+                return half4(red, green, blue, 1);
             }
             ENDHLSL
         }

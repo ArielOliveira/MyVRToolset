@@ -2,7 +2,7 @@
 #define MATH
 
 //smooth version of step
-float aaStep(float compValue, float gradient){
+float aaStep(float compValue, float gradient) {
     float halfChange = fwidth(gradient) * 0.5;
     //base the range of the inverse lerp on the change over one pixel
     float lowerEdge = compValue - halfChange;

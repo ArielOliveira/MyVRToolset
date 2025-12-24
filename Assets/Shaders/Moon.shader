@@ -4,6 +4,8 @@ Shader "Arielado/Moon" {
         [MainTexture] _BaseMap("Base Map", Cube) = "white"
         
         [NoScaleOffset] _BumpMap  ("Normal", Cube) = "bump" {}
+
+        _EclipseColor ("Eclipse Color", Color) = (0.3, 0.05, 0)
     }
 
     SubShader {
@@ -37,6 +39,7 @@ Shader "Arielado/Moon" {
 
             CBUFFER_START(UnityPerMaterial)
                 half4 _BaseColor;
+                half4 _EclipseColor;
                 float4 _BaseMap_ST;
             CBUFFER_END
 
@@ -74,7 +77,7 @@ Shader "Arielado/Moon" {
                 SkyData data;
                 
                 half4 sky = ComputeSkybox(viewDirWS, data);
-                half4 color = SAMPLE_TEXTURECUBE(_BaseMap, sampler_BaseMap, IN.normalOS) * _BaseColor * 2.5;
+                half4 color = SAMPLE_TEXTURECUBE(_BaseMap, sampler_BaseMap, IN.normalOS) * lerp(_EclipseColor, _BaseColor, data.lunarEclipse) * 2.5;
 
                 
                 return lerp(sky, color * saturate(diffuse) + sky, 1 - data.horizonHaze);

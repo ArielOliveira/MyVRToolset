@@ -6,6 +6,7 @@ struct SkyData {
     half sunBloom;
     half moon;
     half moonBloom;
+    half lunarEclipse;
     half horizonHaze;
 };
 

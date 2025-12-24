@@ -1,15 +1,27 @@
 // Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel CSMain
+#pragma kernel GetPowLUT
+#pragma kernel GetHorizonLUT
 
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 RWTexture2D<float4> Result;
+float lutSize;
 
-[numthreads(8,1,1)]
-void CSMain (uint3 id : SV_DispatchThreadID) {
+[numthreads(8,8,1)]
+void GetPowLUT (uint3 id : SV_DispatchThreadID) {
     // TODO: insert actual code here!
 
     //Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
-    float value = pow(0.002 * id.x, 2);
+    //float value = pow((id.x / lutSize), 2);
+
+    //float4 value = float4(pow(id.x / lutSize, 6), pow(id.y / lutSize, 6), 0, 0);
+    float4 value = float4(pow(id.x * 0.002, 8), pow(id.y * 0.002, 8), pow(id.x * 0.002, 5), pow(id.y * 0.002, 5));
     Result[id.xy] = value;
+}
+
+[numthreads(8, 8, 1)]
+void GetHorizonLUT(uint3 id : SV_DispatchThreadID) {
+    float x = id.x * 0.5;
+
+    Result[id.xy] = float4(x / lutSize, 0, 0, 1);
 }

@@ -211,13 +211,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.0803727, y: -0.7291569, z: 0.08694669, w: 0.6740258}
+  m_LocalRotation: {x: -0, y: -0.9659259, z: -0.258819, w: 0}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 13.6, y: -94.5, z: 0}
+  m_LocalEulerAnglesHint: {x: -30, y: -180, z: 0}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -259,17 +259,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 421e4ab39eb463547b97ea1f63243f33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LightSetter
+  computeShader: {fileID: 7200000, guid: dc2d970b2203a764db6648c239493a4c, type: 3}
   powLut: {fileID: 2800000, guid: b733569b0a5e1714a870a0bba7a15550, type: 3}
   skyGradients: {fileID: 2800000, guid: 98a4a08daed128543b0cf9cd9fbeb64d, type: 3}
   nightSky: {fileID: 8900000, guid: ec4d2a4cc74d3b441af28bc46ca06e8a, type: 3}
   clouds: {fileID: 8900000, guid: eeef069570d8909488b7b53d7c791daa, type: 3}
   moon: {fileID: 1902702373}
-  moonRotation: {x: 99.7, y: -83.5, z: 0}
-  nightSkyExposureX: 0.349
-  nightSkyExposureY: 1
-  sunRadius: 0.117
+  moonRotation: {x: 30, y: 62.3, z: 0}
+  nightSkyExposureX: 0
+  nightSkyExposureY: 0.827
+  sunRadius: 0.12
   moonRadius: 0.1
-  moonDistanceResize: {x: 2.844, y: 2.715}
+  moonDistanceResize: {x: 2.85, y: 2.73}
   debugCircleRadius: 0.1
   debugLineSize: 0.5
 --- !u!1 &491732925
@@ -361,14 +362,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 505355060}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.25156116, y: 0.5894779, z: 0.20010075, w: 0.74107534}
+  m_LocalRotation: {x: -0.40507865, y: 0.5396702, z: 0.331553, w: 0.6593482}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 491732926}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -37.5, y: 77, z: 0}
+  m_LocalEulerAnglesHint: {x: -63.13, y: 78.6, z: 0}
 --- !u!1 &1902702369
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,13 +474,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1902702369}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.10810317, y: 0.356588, z: 0.082702346, w: 0.9242938}
-  m_LocalPosition: {x: -16.878391, y: 103.48791, z: 4.293335}
-  m_LocalScale: {x: 28.44, y: 28.44, z: 28.44}
+  m_LocalRotation: {x: 0.30094606, y: -0.65629774, z: 0.32272518, w: 0.6120075}
+  m_LocalPosition: {x: -76.156555, y: 50.363655, z: -41.426464}
+  m_LocalScale: {x: 28.5, y: 28.5, z: 28.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 345, y: 41.6, z: -355.5}
+  m_LocalEulerAnglesHint: {x: 52.37, y: -94, z: 0}
 --- !u!1 &1904517658
 GameObject:
   m_ObjectHideFlags: 0
@@ -587,7 +588,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 0.86}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
