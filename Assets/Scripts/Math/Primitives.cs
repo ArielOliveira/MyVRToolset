@@ -55,6 +55,12 @@ namespace Arielado.Math.Primitives {
 
         public static Vector3 ClosestPointTo(Triangle tri, Vector3 target) =>
             Geometry.ClosestPointOnTriangle(tri.v0, tri.v1, tri.v2, target);
+
+        public static Vector3 ClosestPointTo(Triangle tri, Vector3 target, Transform transform) =>
+            Geometry.ClosestPointOnTriangle(transform.TransformPoint(tri.v0),
+                                            transform.TransformPoint(tri.v1),
+                                            transform.TransformPoint(tri.v2), 
+                                            target);
     }
 
     public struct TriangleIntersectionData {
