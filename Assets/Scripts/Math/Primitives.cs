@@ -61,6 +61,11 @@ namespace Arielado.Math.Primitives {
                                             transform.TransformPoint(tri.v1),
                                             transform.TransformPoint(tri.v2), 
                                             target);
+
+        public static Triangle Transform(Triangle tri, Transform transform) =>
+            new Triangle(transform.TransformPoint(tri.v0),
+                         transform.TransformPoint(tri.v1),
+                         transform.TransformPoint(tri.v2));
     }
 
     public struct TriangleIntersectionData {

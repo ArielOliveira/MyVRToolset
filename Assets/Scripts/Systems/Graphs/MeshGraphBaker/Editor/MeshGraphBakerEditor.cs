@@ -58,6 +58,19 @@ namespace Arielado.Graphs {
                 AStarSearch.GetPath(graph, t.transform, start, goal, out path);
             }
 
+            if (GUILayout.Button("Search Path With Position Goal")) {
+                if (t._Mesh == null) return;
+
+                string filePath = Paths.GetPersistentDir(Paths.TRIANGLE_GRAPHS + t._Mesh.name + ".json");
+                if (!File.Exists(filePath)) { Debug.Log(filePath + " File doesn't exists!"); return; }
+
+                MeshTriangleGraph graph = JsonUtility.FromJson<MeshTriangleGraph>(File.ReadAllText(filePath));
+
+                Debug.Log(graph.triangles.Length);
+
+                AStarSearch.GetPath(graph, t.transform, start, t._TestSearchGoal.position, out path);
+            }
+
             GUI.enabled = false;
             EditorGUILayout.IntField("Triangle Neighbour Count: ", triangleNeighbours);
             GUI.enabled = true;

@@ -5,7 +5,8 @@ using UnityEngine;
 
 namespace Arielado.Graphs {
     public static class AStarSearch {
-        public static bool GetPath(IGraph graph, Transform reference, int start, int goal,  out List<Vector3> path) { 
+        #region Node Based Search
+        public static bool GetPath(IGraph graph, Transform reference, int start, int goal, out List<Vector3> path) { 
             if (!graph.IsInBounds(start) || !graph.IsInBounds(goal)) {
                 Debug.Log("Out of Bounds!");
 
@@ -59,5 +60,69 @@ namespace Arielado.Graphs {
 
             return true; 
         }
+        #endregion
+
+        #region Position Based Search (Bound Constrained)
+        public static bool GetPath(IGraph graph, Transform reference, int start, Vector3 goal, out List<Vector3> path) { 
+            if (!graph.IsInBounds(start) || !graph.IsInBounds(reference, goal)) {
+                Debug.Log("Out of Bounds!");
+
+                path = null;
+                return false;
+            }
+
+            GraphSolver solver = new GraphSolver(reference, graph);
+            solver.SetNode(start, new PathNode() { index = start, parent = -1, f = 0, g = 0, h = 0 });
+
+            SortedList<double, int> openList = new SortedList<double, int>();
+            HashSet<int> closedList = new HashSet<int>();
+
+            openList.Add(solver.GetNode(start).f, start);
+
+            path = new List<Vector3>(); 
+
+            while (openList.Count > 0) {
+                PathNode current = solver.GetNode(openList.First().Value);
+                openList.RemoveAt(0);
+
+                if (!closedList.Contains(current.index)) {
+                    closedList.Add(current.index);
+                    path.Add(graph.GetNodeClosestPointToWS(reference, graph.GetNodeCenterWS(reference, current.parent), current.index));
+                }
+
+                if (!graph.IsInBounds(current.index)) { Debug.Log("Out of Bounds!"); return false; };
+
+                Vector3 closestToGoal = graph.GetNodeClosestPointToWS(reference, goal, current.index);
+
+                if (Vector3.Distance(closestToGoal, goal) <= 0.0001f) {
+                    Debug.Log("Reached Goal!");
+
+                    return true;
+                }
+
+                int[] neighbours = graph.GetNodeNeighbours(current.index);
+                for (int i = 0; i < neighbours.Length; i++) {
+                    PathNode candidate = solver.GetNode(neighbours[i]);
+
+                    if (!closedList.Contains(candidate.index)) {
+                        double fNew = solver.ComputeStepCost(current.index, candidate.index, start, goal, out double gNew, out double hNew);
+
+                        if (candidate.f > fNew) {
+                            solver.SetNode(candidate.index, new PathNode() { index = candidate.index, parent = current.index, f = fNew, g = gNew, h = hNew } );
+
+                            if (openList.ContainsKey(fNew))
+                                openList.Add(fNew + (Random.Range(-1f, 1f) * 0.00001f), candidate.index);
+                            else 
+                                openList.Add(fNew, candidate.index);
+                        }
+                    }
+                }
+            }
+
+            Debug.Log("Reached Goal!");
+
+            return true; 
+        }
+        #endregion
     }
 }

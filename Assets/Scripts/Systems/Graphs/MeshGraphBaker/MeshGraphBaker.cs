@@ -8,12 +8,14 @@ namespace Arielado.Graphs {
     [RequireComponent(typeof(MeshFilter))]
     public class MeshGraphBaker : MonoBehaviour {
         [SerializeField] private MeshFilter meshFilter;
+        [SerializeField] private Transform testSearchGoal;
         //[SerializeField] private bool useSharedEdges;
 
         private Dictionary<int, HashSet<int>> triangleNeighbours;
         public Dictionary<int, HashSet<int>> TriangleNeighbours => triangleNeighbours;
 
         public Mesh _Mesh => meshFilter?.sharedMesh;
+        public Transform _TestSearchGoal => testSearchGoal;
 
         public void Setup() {
             meshFilter = GetComponent<MeshFilter>();
@@ -164,7 +166,7 @@ namespace Arielado.Graphs {
                                                                edgeToEdgeIndex[edge0], edgeToEdgeIndex[edge1], edgeToEdgeIndex[edge2]);
             }
 
-            MeshTriangleGraph graph = new MeshTriangleGraph(triangles, triangleNodes, edges.ToArray());
+            MeshTriangleGraph graph = new MeshTriangleGraph(triangles, triangleNodes, edges.ToArray(), _Mesh.bounds);
             string graphToJson = JsonUtility.ToJson(graph);
 
             File.WriteAllText(Paths.GetPersistentDir(Paths.TRIANGLE_GRAPHS) + $"{_Mesh.name}.json", graphToJson);

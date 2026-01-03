@@ -2,8 +2,6 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using Arielado.Math;
-using UnityEngine.InputSystem.XR;
-using Unity.VisualScripting;
 
 public class Finger : MonoBehaviour {
     [SerializeField] private Transform root;

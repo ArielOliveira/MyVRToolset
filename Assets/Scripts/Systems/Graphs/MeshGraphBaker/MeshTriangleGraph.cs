@@ -42,11 +42,13 @@ namespace Arielado.Graphs {
         public Triangle[] triangles;
         public TriangleNode[] triangleNodes;
         public TriangleEdge[] edges;
+        public Bounds bounds;
 
-        public MeshTriangleGraph(Triangle[] triangles, TriangleNode[] triangleNodes, TriangleEdge[] edges) {
+        public MeshTriangleGraph(Triangle[] triangles, TriangleNode[] triangleNodes, TriangleEdge[] edges, Bounds bounds) {
             this.triangles = triangles;
             this.triangleNodes = triangleNodes;
             this.edges = edges;
+            this.bounds = bounds;
         } 
 
         public Vector3 GetNodeClosestPointToWS(Transform reference, Vector3 target, int node) {
@@ -83,9 +85,19 @@ namespace Arielado.Graphs {
             return (t.v0 + t.v1 + t.v2) / 3f;
         }
 
+        public Vector3 GetClosestPointInBounds(Transform reference, Vector3 target) {
+            
+
+            return Vector3.zero;
+
+        }
+
         public int Size => triangles?.Length ?? 0;
         public bool IsInBounds(int node) =>
             node >= 0 && node < triangles.Length;
+        
+        public bool IsInBounds(Transform reference, Vector3 target) =>
+            bounds.Contains(reference.InverseTransformPoint(target));
 
         public int GetNodeIndex(int node) {
             if (!IsInBounds(node)) return -1;
@@ -100,7 +112,7 @@ namespace Arielado.Graphs {
         }
 
         public void CopyTo(ref IGraph graph) {
-            graph = new MeshTriangleGraph(this.triangles, this.triangleNodes, this.edges);
+            graph = new MeshTriangleGraph(this.triangles, this.triangleNodes, this.edges, this.bounds);
         }
     }
 }

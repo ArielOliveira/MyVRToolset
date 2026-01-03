@@ -7,11 +7,13 @@ namespace Arielado.Graphs {
     public interface IGraph {
         public int Size { get; }
         public bool IsInBounds(int node);
+        public bool IsInBounds(Transform reference, Vector3 target);
         public int GetNodeIndex(int node);
         Vector3 GetNodeClosestPointToWS(Transform reference, Vector3 target, int node);
         Vector3 GetNodeClosestPointToOS(Vector3 target, int node);
         Vector3 GetNodeCenterWS(Transform reference, int node);
         Vector3 GetNodeCenterOS(int node);
+        Vector3 GetClosestPointInBounds(Transform reference, Vector3 target);
         int[] GetNodeNeighbours(int node);
         void CopyTo(ref IGraph graph);
     }
@@ -25,6 +27,7 @@ namespace Arielado.Graphs {
 
         // Should return F 
         double ComputeStepCost(int from, int to, int start, int goal, out double g, out double h);
+        double ComputeStepCost(int from, int to, int start, Vector3 goal, out double g, out double h);
     }
 
     public interface IGraphSolver<T> : IGraphSolver where T : IGraph {}
@@ -76,10 +79,19 @@ namespace Arielado.Graphs {
                                       out double g, out double h) {
             Vector3 goalPos = graph.GetNodeCenterWS(reference, goal);
             Vector3 candidateClosestPointToGoal = graph.GetNodeClosestPointToWS(reference, goalPos, to);
-            Vector3 currentClosestPointToGoal = graph.GetNodeClosestPointToWS(reference, candidateClosestPointToGoal, from);
 
-            g = Vector3.Distance(candidateClosestPointToGoal, currentClosestPointToGoal);
+            g = 1;
             h = Vector3.Distance(candidateClosestPointToGoal, goalPos);
+
+            return g + h;
+        }
+
+        public double ComputeStepCost(int from, int to, int start, Vector3 goal,
+                                      out double g, out double h) {
+            
+            Vector3 candidateClosestPointToGoal = graph.GetNodeClosestPointToWS(reference, goal, to);
+            g = 1;
+            h = Vector3.Distance(candidateClosestPointToGoal, goal);
 
             return g + h;
         }
