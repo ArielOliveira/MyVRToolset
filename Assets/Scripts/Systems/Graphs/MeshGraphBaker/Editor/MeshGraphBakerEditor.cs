@@ -11,7 +11,7 @@ namespace Arielado.Graphs {
         [SerializeField] private int start, goal;
         [SerializeField] private float debugGraphicRadius = 0.05f; 
 
-        [SerializeField] private List<Vector3> path = new List<Vector3>();
+        [SerializeField] private List<PathNode> path = new List<PathNode>();
 
         [SerializeField] private int triangleNeighbours = 0;
         private void OnEnable() {
@@ -97,19 +97,32 @@ namespace Arielado.Graphs {
         private void DisplayPath() {
             if (path == null || path.Count == 0) return;
 
+            MeshGraphBaker t = (MeshGraphBaker)target;
+
+            string filePath = Paths.GetPersistentDir(Paths.TRIANGLE_GRAPHS + t._Mesh.name + ".json");
+            if (!File.Exists(filePath)) { Debug.Log(filePath + " File doesn't exists!"); return; }
+
+            MeshTriangleGraph graph = JsonUtility.FromJson<MeshTriangleGraph>(File.ReadAllText(filePath));
+
             if (path.Count > 1) {
                 for (int i = 0; i < path.Count-1; i++) {
                     Handles.color = Color.blue;
-                    Handles.DrawLine(path[i], path[i+1]);
+
+                    Vector3 p0 = t.transform.TransformPoint((graph.triangles[path[i].index].v0 + graph.triangles[path[i].index].v1 + graph.triangles[path[i].index].v2) / 3);
+                    Vector3 p1 = t.transform.TransformPoint((graph.triangles[path[i+1].index].v0 + graph.triangles[path[i+1].index].v1 + graph.triangles[path[i+1].index].v2) / 3);
+
+
+                    Handles.DrawLine(p0, p1);
 
                     Handles.color = Color.yellow;    
-                    Handles.DrawWireDisc(path[i], Vector3.up, debugGraphicRadius);
-                    Handles.DrawWireDisc(path[i], Vector3.right, debugGraphicRadius);
-                    Handles.DrawWireDisc(path[i+1], Vector3.up, debugGraphicRadius);
-                    Handles.DrawWireDisc(path[i+1], Vector3.right, debugGraphicRadius);
+                    Handles.DrawWireDisc(p0, Vector3.up, debugGraphicRadius);
+                    Handles.DrawWireDisc(p0, Vector3.right, debugGraphicRadius);
+                    Handles.DrawWireDisc(p1, Vector3.up, debugGraphicRadius);
+                    Handles.DrawWireDisc(p1, Vector3.right, debugGraphicRadius);
                 }
             } else {
-                Handles.DrawSolidDisc(path[0], Vector3.up, debugGraphicRadius);
+                Vector3 p0 = t.transform.TransformPoint((graph.triangles[path[0].index].v0 + graph.triangles[path[0].index].v1 + graph.triangles[path[0].index].v2) / 3);
+                Handles.DrawSolidDisc(p0, Vector3.up, debugGraphicRadius);
             }
         }
 

@@ -18,7 +18,8 @@ namespace Arielado.Math {
             return false;
         }
 
-        public static bool LinePlaneIntersection(Vector3 p0, Vector3 p1, Vector3 pPos, Vector3 pNormal, out Vector3 intersection, out float normalizedLinePoint) {
+        // Where t is a normalized range from 0 to 1
+        public static bool LinePlaneIntersection(Vector3 p0, Vector3 p1, Vector3 pPos, Vector3 pNormal, out Vector3 intersection, out float t) {
             Vector3 diff = p1 - p0;
             Vector3 rayDir = diff.normalized;
 
@@ -28,7 +29,7 @@ namespace Arielado.Math {
             bool hasIntersected = planeResult && dist <= length;
 
             dist = Mathf.Clamp(dist, 0, length);
-            normalizedLinePoint = Mathf.Abs(dist) / length;
+            t = Mathf.Abs(dist) / length;
             
             intersection = p0 + rayDir * dist;
 
@@ -212,7 +213,7 @@ namespace Arielado.Math {
             Vector3 cp0 = Vector3.Cross(b-a, p0-a);
             Vector3 cp1 = Vector3.Cross(b-a, p1-a);
 
-            return (Vector3.Dot(cp0, cp1)) >= 0;
+            return Vector3.Dot(cp0, cp1) >= 0;
         }
 
         public static Vector3 ClosestPointTo(Vector3 target, params Vector3[] points) {

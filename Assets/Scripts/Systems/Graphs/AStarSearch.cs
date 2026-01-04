@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Arielado.Graphs {
     public static class AStarSearch {
         #region Node Based Search
-        public static bool GetPath(IGraph graph, Transform reference, int start, int goal, out List<Vector3> path) { 
+        public static bool GetPath(IGraph graph, Transform reference, int start, int goal, out List<PathNode> path) { 
             if (!graph.IsInBounds(start) || !graph.IsInBounds(goal)) {
                 Debug.Log("Out of Bounds!");
 
@@ -22,7 +22,7 @@ namespace Arielado.Graphs {
 
             openList.Add(solver.GetNode(start).f, start);
 
-            path = new List<Vector3>(); 
+            path = new List<PathNode>(); 
 
             while (openList.Count > 0) {
                 PathNode current = solver.GetNode(openList.First().Value);
@@ -30,12 +30,13 @@ namespace Arielado.Graphs {
 
                 if (!closedList.Contains(current.index)) {
                     closedList.Add(current.index);
-                    path.Add(graph.GetNodeClosestPointToWS(reference, graph.GetNodeCenterWS(reference, current.parent), current.index));
+                    //path.Add(graph.GetNodeClosestPointToWS(reference, graph.GetNodeCenterWS(reference, current.parent), current.index));
+                    path.Add(current);
                 }
 
                 if (!graph.IsInBounds(current.index)) { Debug.Log("Out of Bounds!"); return false; };
 
-                if (current.index == goal) { Debug.Log("Reached Goal!"); return true; }
+                if (current.index == goal) return true;
 
                 int[] neighbours = graph.GetNodeNeighbours(current.index);
                 for (int i = 0; i < neighbours.Length; i++) {
@@ -62,9 +63,9 @@ namespace Arielado.Graphs {
         }
         #endregion
 
-        #region Position Based Search (Bound Constrained)
-        public static bool GetPath(IGraph graph, Transform reference, int start, Vector3 goal, out List<Vector3> path) { 
-            if (!graph.IsInBounds(start) || !graph.IsInBounds(reference, goal)) {
+        #region Position Based Search (Bounds Constrained)
+        public static bool GetPath(IGraph graph, Transform reference, int start, Vector3 goal, out List<PathNode> path) { 
+            if (!graph.IsInBounds(start)) {
                 Debug.Log("Out of Bounds!");
 
                 path = null;
@@ -79,7 +80,7 @@ namespace Arielado.Graphs {
 
             openList.Add(solver.GetNode(start).f, start);
 
-            path = new List<Vector3>(); 
+            path = new List<PathNode>(); 
 
             while (openList.Count > 0) {
                 PathNode current = solver.GetNode(openList.First().Value);
@@ -87,7 +88,8 @@ namespace Arielado.Graphs {
 
                 if (!closedList.Contains(current.index)) {
                     closedList.Add(current.index);
-                    path.Add(graph.GetNodeClosestPointToWS(reference, graph.GetNodeCenterWS(reference, current.parent), current.index));
+                    //path.Add(graph.GetNodeClosestPointToWS(reference, graph.GetNodeCenterWS(reference, current.parent), current.index));
+                    path.Add(current);
                 }
 
                 if (!graph.IsInBounds(current.index)) { Debug.Log("Out of Bounds!"); return false; };
@@ -95,8 +97,6 @@ namespace Arielado.Graphs {
                 Vector3 closestToGoal = graph.GetNodeClosestPointToWS(reference, goal, current.index);
 
                 if (Vector3.Distance(closestToGoal, goal) <= 0.0001f) {
-                    Debug.Log("Reached Goal!");
-
                     return true;
                 }
 
@@ -118,8 +118,6 @@ namespace Arielado.Graphs {
                     }
                 }
             }
-
-            Debug.Log("Reached Goal!");
 
             return true; 
         }

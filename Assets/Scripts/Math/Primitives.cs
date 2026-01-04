@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 
 namespace Arielado.Math.Primitives {
+    [System.Serializable]
     public struct Line : IEquatable<Line> {
         public Vector3 p0, p1;
         public Vector3 direction;
@@ -32,7 +33,7 @@ namespace Arielado.Math.Primitives {
             
     }
 
-    [Serializable]
+    [System.Serializable]
     public struct Triangle {
         public Vector3 v0, v1, v2;
         public Vector3 normal, normalScaled;

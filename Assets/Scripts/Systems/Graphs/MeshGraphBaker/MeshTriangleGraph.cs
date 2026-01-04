@@ -3,6 +3,7 @@ using Arielado.Math.Primitives;
 using UnityEngine;
 
 namespace Arielado.Graphs {
+    [System.Serializable]
     public struct TriangleEdge : IEquatable<TriangleEdge> {
         public int index;
         public Line line;
@@ -10,7 +11,6 @@ namespace Arielado.Graphs {
         public int triangle1;
 
         public override int GetHashCode() => line.GetHashCode();
-
         public override bool Equals(object other) {
             if (other is Line) 
                 return Equals((Line)other);
@@ -34,6 +34,17 @@ namespace Arielado.Graphs {
             this.edge0 = edge0;
             this.edge1 = edge1;
             this.edge2 = edge2;
+        }
+
+        public static int GetEdge(TriangleNode node, int index) {
+            index = Mathf.Clamp(index, 0, 2);
+
+            switch(index) {
+                case 0: return node.edge0;
+                case 1: return node.edge1;
+                case 2: return node.edge2;
+                default: return node.edge0;
+            }
         }
     }
 
