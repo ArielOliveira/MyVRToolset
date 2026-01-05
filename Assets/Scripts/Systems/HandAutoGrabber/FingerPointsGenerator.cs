@@ -204,6 +204,14 @@ namespace Arielado {
 
             bool canReach = AStarSearch.GetPath(graph, _collider.transform, 0, closestPointToFinger, out List<PathNode> waypoint);
 
+            for (int i = 0; i < waypoint.Count; i++) {
+                Triangle tri = Triangle.Transform(graph.triangles[waypoint[i].index], _collider.transform);
+                Vector3 triCenter = (tri.v0 + tri.v1 + tri.v2) / 3; 
+
+                Gizmos.color = Color.white;
+                Gizmos.DrawWireSphere(triCenter, debugRadius * 0.5f);
+            }
+
             return waypoint[waypoint.Count-1].index;
         }
 

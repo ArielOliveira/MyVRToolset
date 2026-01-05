@@ -36,7 +36,7 @@ namespace Arielado.Graphs {
 
                 if (!graph.IsInBounds(current.index)) { Debug.Log("Out of Bounds!"); return false; };
 
-                if (current.index == goal) return true;
+                if (solver.IsDestiny(current.index, goal)) return true;
 
                 int[] neighbours = graph.GetNodeNeighbours(current.index);
                 for (int i = 0; i < neighbours.Length; i++) {
@@ -73,7 +73,8 @@ namespace Arielado.Graphs {
             }
 
             GraphSolver solver = new GraphSolver(reference, graph);
-            solver.SetNode(start, new PathNode() { index = start, parent = -1, f = 0, g = 0, h = 0 });
+            double startValue = solver.ComputeH(start, goal);
+            solver.SetNode(start, new PathNode() { index = start, parent = -1, f = startValue + 1, g = 1, h = startValue });
 
             SortedList<double, int> openList = new SortedList<double, int>();
             HashSet<int> closedList = new HashSet<int>();
@@ -83,7 +84,7 @@ namespace Arielado.Graphs {
             path = new List<PathNode>(); 
 
             while (openList.Count > 0) {
-                PathNode current = solver.GetNode(openList.First().Value);
+                PathNode current = solver.GetNode(openList.Values[0]);
                 openList.RemoveAt(0);
 
                 if (!closedList.Contains(current.index)) {
@@ -94,11 +95,7 @@ namespace Arielado.Graphs {
 
                 if (!graph.IsInBounds(current.index)) { Debug.Log("Out of Bounds!"); return false; };
 
-                Vector3 closestToGoal = graph.GetNodeClosestPointToWS(reference, goal, current.index);
-
-                if (Vector3.Distance(closestToGoal, goal) <= 0.0001f) {
-                    return true;
-                }
+                if (solver.IsDestiny(current.index, goal)) return true;
 
                 int[] neighbours = graph.GetNodeNeighbours(current.index);
                 for (int i = 0; i < neighbours.Length; i++) {
