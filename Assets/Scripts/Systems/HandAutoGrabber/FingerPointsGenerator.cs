@@ -4,6 +4,7 @@ using Arielado.Graphs;
 using Arielado.Math.Primitives;
 using UnityEditor;
 using System.Collections.Generic;
+using Arielado.Math;
 
 
 namespace Arielado {
@@ -12,6 +13,7 @@ namespace Arielado {
         [SerializeField] private Mesh mesh;
         [SerializeField] private float debugRadius = 0.1f, fingerRadius = 0.2f;
         [SerializeField, ReadOnly] private int stepIndex = -1;
+        [SerializeField] private int testTriangle = 0;
         [SerializeField] private bool useStepIndex, step = false;
         private MeshTriangleGraph graph;
         
@@ -60,7 +62,7 @@ namespace Arielado {
 
                 Vector3 intersectionPointCenter = (i0 + i1) * 0.5f;
 
-                triIndex = StepForward(triIndex, intersectionPointCenter, surfaceClockwiseDir); 
+                StepForward(triIndex, intersectionPointCenter, surfaceClockwiseDir, out triIndex); 
 
                 tri = graph.triangles[triIndex];
 
@@ -126,7 +128,75 @@ namespace Arielado {
                 Gizmos.color = Color.darkBlue;
                 Gizmos.DrawLineStrip(points.ToArray(), false);
                 Gizmos.DrawSphere(points[i], debugRadius * 0.5f);
+                
+                Handles.Label(points[i] + transform.up * 0.1f, (i + 1).ToString() + "|" + points.Count.ToString());
             }
+        }
+
+        /*private void OnDrawGizmosSelected() {
+            if (_collider == null || mesh == null) return;
+
+            if (graph.triangles == null || graph.triangles.Length == 0) {
+                string path = Paths.GetPersistentDir(Paths.TRIANGLE_GRAPHS + mesh.name + ".json");
+                if (!File.Exists(path)) { Debug.Log(path + " File doesn't exists!"); return; }
+                graph = JsonUtility.FromJson<MeshTriangleGraph>(File.ReadAllText(path));    
+            }
+
+            Handles.color = Color.blue;
+            Handles.DrawWireDisc(transform.position, transform.right, fingerRadius);
+
+            testTriangle = Mathf.Clamp(testTriangle, 0, graph.triangles.Length-1);
+
+            Triangle tri = Triangle.Transform(graph.triangles[testTriangle], _collider.transform);
+            Vector3 triCenter = (tri.v0 + tri.v1 + tri.v2) / 3f;
+
+            Vector3[] pList = new Vector3[] { tri.v0, tri.v1, tri.v2 };
+
+            Vector3 i0 = Vector3.negativeInfinity;
+            Vector3 i1 = Vector3.negativeInfinity;
+            bool i0Intersects = false;
+            bool i1Intersects = false;
+
+            //////// Step 1: Circle intersects triangle plane ///////////////////////////
+            Vector3 circleTriPlane = Vector3.Cross(tri.normal, transform.right).normalized;
+            Vector3 circleToTriUp = Vector3.Cross(transform.right, circleTriPlane).normalized;
+
+            float normalAngle = Geometry.CirclePointToAngle(Vector3.zero, -tri.normal, transform.right, transform.up);
+            Vector3 anglePoint = Geometry.CirclePointFromAngle(normalAngle, fingerRadius, transform.right, transform.up, transform.position);
+
+            // Intersection line crosses circle vertically towards the triangle plane
+            Vector3 l0 = transform.position + (circleToTriUp * fingerRadius);
+            Vector3 l1 = anglePoint;
+
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawLine(l0, l1);
+
+            bool triPlaneIntersection = Geometry.LinePlaneIntersection(l0, l1, triCenter, -tri.normal, out Vector3 planeIntersection, out float normalizedLinePoint);
+            
+            //////// Step 2: Find the two points on the circle that intersects the triangle plane
+            //if (!triPlaneIntersection) return;
+
+            // Intersection line crosses circle horizontally along the triangle plane
+            Vector3 segment0 = planeIntersection - (circleTriPlane * fingerRadius);
+            Vector3 segment1 = planeIntersection + (circleTriPlane * fingerRadius);
+
+            Geometry.LineCircleIntersection(fingerRadius, transform.position, segment0, segment1, transform.right, transform.up, out i0, out i1);
+
+            Gizmos.color = (i0Intersects || i1Intersects) ? Color.green : Color.red;
+            Gizmos.DrawLineStrip(pList, true);
+        }*/
+
+        private int FindCircleIntersectingTriangle(out Triangle wsTri, out Vector3 triCenter) {
+            int index = GetClosestTriangleToCircle(out Vector3 closestPointToFinger);
+
+            wsTri = Triangle.Transform(graph.triangles[index], _collider.transform);
+            triCenter = (wsTri.v0 + wsTri.v1 + wsTri.v2) / 3;
+
+            if (!Math.Geometry.CircleTriangleIntersection(wsTri.v0, wsTri.v1, wsTri.v2, triCenter, wsTri.normal, transform.position, transform.up, transform.right, fingerRadius, out Vector3 i0, out Vector3 i1, out bool i0Intersects, out bool i1Intersects)) {
+                index = StepTowardsCircle(index, triCenter);
+            }
+
+            return index;
         }
 
         private int GetClosestTriangleToCircle(out Vector3 closestPointToFinger) {
@@ -140,87 +210,47 @@ namespace Arielado {
         private List<Vector3> GetFingerPoints() {
             List<Vector3> points = new List<Vector3>();
 
-            int index = GetClosestTriangleToCircle(out Vector3 closestPointToFinger);
+            int index = FindCircleIntersectingTriangle(out Triangle tri, out Vector3 triCenter);
 
-            Triangle tri = Triangle.Transform(graph.triangles[index], _collider.transform);
-            Vector3 triCenter = (tri.v0 + tri.v1 + tri.v2) / 3;
+            HashSet<int> visited = new HashSet<int>();          
 
-            if (!Math.Geometry.CircleTriangleIntersection(tri.v0, tri.v1, tri.v2, triCenter, tri.normal, transform.position, transform.up, transform.right, fingerRadius, out Vector3 i0, out Vector3 i1, out bool i0Intersects, out bool i1Intersects)) {
-                index = StepTowardsCircle(index, triCenter);
-                
-                tri = Triangle.Transform(graph.triangles[index], _collider.transform);
-                triCenter = (tri.v0 + tri.v1 + tri.v2) / 3;
-
-                if (!Math.Geometry.CircleTriangleIntersection(tri.v0, tri.v1, tri.v1, triCenter, tri.normal, transform.position, transform.up, transform.right, fingerRadius, out i0, out i1, out i0Intersects, out i1Intersects)) return null;
-            }
-
-            HashSet<int> visited = new HashSet<int>();
-            HashSet<Vector3> addedPoints = new HashSet<Vector3>();
-
-            visited.Add(index);
-            
             bool canStep = true;
-
-            Gizmos.color = i0Intersects ? Color.darkBlue : Color.darkOrange;
-            Gizmos.DrawWireSphere(i0, debugRadius);
-
-            Gizmos.color = i1Intersects ? Color.darkBlue : Color.darkOrange;
-            Gizmos.DrawWireSphere(i1, debugRadius);
-            
-            if (i0Intersects) {
-                points.Add(i0);
-                addedPoints.Add(i0);
-            }
-
-            if (i1Intersects) {
-                points.Add(i1);
-                addedPoints.Add(i1);
-            }
 
             while (canStep) {
                 canStep = false;
+                visited.Add(index);
 
-                Vector3 intersectionPointCenter = (i0 + i1) * 0.5f;
-                Vector3 surfaceClockwiseDir = -Vector3.Cross(tri.normal, transform.right);
-
-                int stepTriangle = StepForward(index, intersectionPointCenter, surfaceClockwiseDir);
-
-                if (visited.Contains(stepTriangle)) break;
-
-                tri = Triangle.Transform(graph.triangles[stepTriangle], _collider.transform);
-                
-                if (Math.Geometry.CircleTriangleIntersection(tri.v0, tri.v1, tri.v2, triCenter, tri.normal, transform.position, transform.up, transform.right, fingerRadius, out i0, out i1, out i0Intersects, out i1Intersects)) {
-                    canStep = true;
-                    index = stepTriangle;
-
-                    Gizmos.color = i0Intersects ? Color.darkBlue : Color.darkOrange;
-                    Gizmos.DrawWireSphere(i0, debugRadius);
-
-                    Gizmos.color = i1Intersects ? Color.darkBlue : Color.darkOrange;
-                    Gizmos.DrawWireSphere(i1, debugRadius);
-
-                    if (i0Intersects && !addedPoints.Contains(i0)) {
-                        points.Add(i0);
-                        addedPoints.Add(i0);
-                    } 
+                tri = Triangle.Transform(graph.triangles[index], _collider.transform);
+                triCenter = (tri.v0 + tri.v1 + tri.v2) / 3f;
                     
-                    if (i1Intersects && !addedPoints.Contains(i1)) {
-                        points.Add(i1);
-                        addedPoints.Add(i1);
-                    }
+                if (Math.Geometry.CircleTriangleIntersection(tri.v0, tri.v1, tri.v2, triCenter, tri.normal, transform.position, transform.up, transform.right, fingerRadius, out Vector3 i0, out Vector3 i1, out bool i0Intersects, out bool i1Intersects)) {   
+                    if (i0Intersects && (points.Count > 0 && (points[points.Count-1] - i0).sqrMagnitude > 0.000025f || points.Count == 0)) points.Add(i0);
+                    if (i1Intersects && (points.Count > 0 && (points[points.Count-1] - i1).sqrMagnitude > 0.000025f || points.Count == 0)) points.Add(i1);
+                    
+                    Vector3 intersectionPointCenter = (i0 + i1) * 0.5f;
+                    Vector3 surfaceClockwiseDir = -Vector3.Cross(tri.normal, transform.right);
 
-                    visited.Add(stepTriangle);
+                    if (StepForward(index, intersectionPointCenter, surfaceClockwiseDir, out index)) {
+                        canStep = visited.Contains(index) ? false : true;
+
+                        Gizmos.color = canStep ? Color.black : Color.red;
+                        Gizmos.DrawWireSphere(intersectionPointCenter, debugRadius);
+                    } 
                 } 
-            }
 
+                Gizmos.color = i0Intersects ? Color.darkBlue : Color.darkOrange;
+                Gizmos.DrawWireSphere(i0, debugRadius);
+
+                Gizmos.color = i1Intersects ? Color.darkBlue : Color.darkOrange;
+                Gizmos.DrawWireSphere(i1, debugRadius);
+            }
+            
             return points;
         }
 
 
 
         private int StepTowardsCircle(int nodeIndex, Vector3 triCenter) {
-            Vector3 targetDir = (transform.position - triCenter).normalized;
-
             TriangleNode node = graph.triangleNodes[nodeIndex];
 
             float score = -1f;
@@ -234,7 +264,7 @@ namespace Arielado {
                 Vector3 center = (p0 + p1) * 0.5f;
                 Vector3 stepDir = (center - triCenter).normalized;
 
-                float dot = Vector3.Dot(stepDir, targetDir);
+                float dot = Vector3.Dot(stepDir, transform.right);
 
                 if (dot > score) {
                     score = dot;
@@ -245,11 +275,14 @@ namespace Arielado {
             return selectedEdge.triangle0 == nodeIndex ? selectedEdge.triangle1 : selectedEdge.triangle0;
         }
 
-        private int StepForward(int nodeIndex, Vector3 circleTriPoint, Vector3 surfaceForward) {
+        private bool StepForward(int nodeIndex, Vector3 circleTriPoint, Vector3 surfaceForward, out int stepIndex) {
             TriangleNode node = graph.triangleNodes[nodeIndex];
 
             float score = -1f;
             int selectedEdge = TriangleNode.GetEdge(node, 0);
+            stepIndex = nodeIndex;
+
+            Vector3 selectedIntersection = circleTriPoint;
 
             for (int i = 0; i < 3; i++) {
                 TriangleEdge edge = graph.edges[TriangleNode.GetEdge(node, i)];
@@ -259,7 +292,6 @@ namespace Arielado {
                 Vector3 rayDir = _collider.transform.TransformDirection(-edge.line.direction);
                 // We're ignoring the line side
                 Vector3 pNormal = transform.right * Mathf.Sign(Vector3.Dot(rayDir, transform.right));
-
                 if (Math.Geometry.LinePlaneIntersection(p0, p1, transform.position, pNormal, out Vector3 intersection, out float t)) {
                     Vector3 dir = (intersection - circleTriPoint).normalized;
 
@@ -268,13 +300,17 @@ namespace Arielado {
                     if (dot > score) {
                         score = dot;
                         selectedEdge = edge.index;
+                        selectedIntersection = intersection;
                     }
                 }
             }
 
-            TriangleEdge e = graph.edges[selectedEdge];
+            if (Vector3.Distance(selectedIntersection, transform.position) >= fingerRadius || score == -1f)  return false;
 
-            return e.triangle0 == nodeIndex ? e.triangle1 : e.triangle0;
+            TriangleEdge e = graph.edges[selectedEdge];
+            stepIndex = (e.triangle0 == nodeIndex) ? e.triangle1 : e.triangle0;
+
+            return true;
         }
     }
 }

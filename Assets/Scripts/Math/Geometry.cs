@@ -332,8 +332,8 @@ namespace Arielado.Math {
             i1Intersects = false;
 
             //////// Step 1: Circle intersects triangle plane ///////////////////////////
-            Vector3 circleTriPlane = Vector3.Cross(triNormal, cRight);
-            Vector3 circleToTriUp = Vector3.Cross(cRight, circleTriPlane);
+            Vector3 circleTriPlane = Vector3.Cross(triNormal, cRight).normalized;
+            Vector3 circleToTriUp = Vector3.Cross(cRight, circleTriPlane).normalized;
 
             float normalAngle = CirclePointToAngle(Vector3.zero, -triNormal, cRight, cUp);
             Vector3 anglePoint = CirclePointFromAngle(normalAngle, radius, cRight, cUp, cPos);
