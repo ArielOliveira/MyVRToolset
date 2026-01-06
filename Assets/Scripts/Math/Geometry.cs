@@ -2,6 +2,13 @@ using UnityEngine;
 
 namespace Arielado.Math {
     public static class Geometry {
+        public static Vector3 PointToPlaneProjection(Vector3 pNormal, Vector3 pPoint, Vector3 target) {
+            Vector3 direction = target - pPoint;
+            float denom = Vector3.Dot(direction, pNormal);
+
+            return target - (pNormal * denom);
+        }
+
         public static bool RayPlaneIntersection(Vector3 pNormal, Vector3 pPoint, Vector3 rayOrigin, Vector3 rayDir, out float t) {
             // assuming vectors are all normalized
             float denom = Vector3.Dot(pNormal, rayDir);
@@ -322,6 +329,9 @@ namespace Arielado.Math {
 
         public static Vector3 CirclePointFromAngle(float angle, float radius, Vector3 right, Vector3 up, Vector3 origin) =>
              origin + CirclePointFromAngle(angle, radius, right, up);
+
+        public static float Split180(float angle) =>
+            angle > 180f ? (angle - 180f) * -1 : angle;
 
         public static bool CircleTriangleIntersection(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 triCenter, Vector3 triNormal, Vector3 cPos, Vector3 cUp, Vector3 cRight, float radius,
                                                       out Vector3 i0, out Vector3 i1, out bool i0Intersects, out bool i1Intersects) {

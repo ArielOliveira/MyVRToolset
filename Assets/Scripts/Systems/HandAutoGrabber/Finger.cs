@@ -2,19 +2,23 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using Arielado.Math;
+using Arielado;
 
 public class Finger : MonoBehaviour {
     [SerializeField] private Transform root;
     [SerializeField] private Transform tip;
-
+    [SerializeField] private FingerPointsGenerator generator;
     [SerializeField] private List<Matrix4x4> anchors;
     [SerializeField] private List<Vector3> anchorEulers;
     [SerializeField] private List<Transform> bones;
     [SerializeField] private List<float> boneLengths;
     [SerializeField] private List<Color> boneColors;
     [SerializeField] private float fingerLength;
+    [SerializeField] private bool useGeneratedPoints, autoRegeneratePoints;
     
-    [SerializeField] private List<float> targetAngles, solvedAngles;
+    [SerializeField] private List<float> targetAngles, solvedAngles, generatedTargetAngles;
+
+    [SerializeField] private List<Vector3> generatedTargetPoints;
 
     [Range(0.001f, 0.1f)] public float debugSphereRadius;
 
@@ -27,16 +31,25 @@ public class Finger : MonoBehaviour {
         Vector3 rootRight =  anchors[0].MultiplyVector(Vector3.right);
         Vector3 rootUp    = -anchors[0].MultiplyVector(Vector3.up);
 
+        if (autoRegeneratePoints) SetupPoints();
+
         float circleLength = 0;
+        List<float> refAngles = (useGeneratedPoints && generatedTargetAngles.Count == bones.Count) ? generatedTargetAngles : targetAngles;
 
         for (int i = 0; i < bones.Count; i++) {
             circleLength += boneLengths[i];
 
-            float lowest = targetAngles[i];
+            float lowest = refAngles[i];
+
+            if (generatedTargetAngles.Count == bones.Count) {
+                Gizmos.color = Color.red;
+                Vector3 grabPoint = Geometry.CirclePointFromAngle(generatedTargetAngles[i], circleLength, rootRight, rootUp, root.position);
+                Gizmos.DrawWireSphere(grabPoint, debugSphereRadius * 2f);
+            }
 
             for (int j = i+1; j < bones.Count; j++) {
-                if (targetAngles[j] < lowest)
-                    lowest = targetAngles[j];
+                if (refAngles[j] < lowest)
+                    lowest = refAngles[j];
             }
 
             Vector3 right =  anchors[i].MultiplyVector(Vector3.right);
@@ -47,7 +60,7 @@ public class Finger : MonoBehaviour {
                 up    = bones[i-1].TransformDirection(up);
             }
 
-            Vector3 target = Geometry.CirclePointFromAngle(targetAngles[i], circleLength, rootRight, rootUp, root.position);
+            Vector3 target = Geometry.CirclePointFromAngle(refAngles[i], circleLength, rootRight, rootUp, root.position);
             Vector3 solvedTarget = Geometry.CirclePointFromAngle(lowest, circleLength, rootRight, rootUp, root.position);
             float alignedAngle = Geometry.CirclePointToAngle(bones[i].position, solvedTarget, right, up);
             Vector3 alignedPoint = Geometry.CirclePointFromAngle(alignedAngle, boneLengths[i], right, up, bones[i].position);
@@ -77,6 +90,31 @@ public class Finger : MonoBehaviour {
     }
     #endif
 
+    public void SetupPoints() {
+        List<Vector3> points = generator.GetFingerPoints();
+
+        Vector3 rootRight =  anchors[0].MultiplyVector(Vector3.right);
+        Vector3 rootUp    = -anchors[0].MultiplyVector(Vector3.up);
+
+        generatedTargetAngles.Clear();
+        Vector3 originPoint = root.position;
+
+        int j = 0;
+
+        for (int i = 0; (i < points.Count) && (j < bones.Count); i++) {
+            float dist = Vector3.Distance(points[i], originPoint);
+
+            if (dist >= boneLengths[j]) {
+                Debug.Log("Adding target to bone: " + j);
+
+                generatedTargetAngles.Add(Geometry.CirclePointToAngle(root.position, points[i], rootRight, rootUp));
+                
+                originPoint = points[i];
+                j++;
+            }
+        }
+    }
+
     public void SetupBones() {
         if (bones == null) bones = new List<Transform>();
         if (boneLengths == null) boneLengths = new List<float>();
@@ -89,8 +127,6 @@ public class Finger : MonoBehaviour {
         if (root == null || tip == null) return;
 
         fingerLength = 0;
-
-        
 
         Transform probe = root;
         bones.Clear();
@@ -134,6 +170,10 @@ public class FingerEditor : Editor {
 
         if (GUILayout.Button("Setup Fingers")) {
             finger.SetupBones();
+        }
+
+        if (GUILayout.Button("Setup Grab Points")) {
+            finger.SetupPoints();
         }
     }
 }

@@ -49,7 +49,7 @@ namespace Arielado {
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(triCenter, triCenter + surfaceClockwiseDir * debugRadius);
 
-            if (Math.Geometry.CircleTriangleIntersection(tri.v0, tri.v1, tri.v2, triCenter, tri.normal, transform.position, transform.up, transform.right, fingerRadius, out Vector3 i0, out Vector3 i1, out bool i0Intersects, out bool i1Intersects)) {
+            if (Geometry.CircleTriangleIntersection(tri.v0, tri.v1, tri.v2, triCenter, tri.normal, transform.position, transform.up, transform.right, fingerRadius, out Vector3 i0, out Vector3 i1, out bool i0Intersects, out bool i1Intersects)) {
                 Gizmos.color = Color.yellow;
                 
                 Gizmos.DrawLineStrip(pList, true);
@@ -70,6 +70,9 @@ namespace Arielado {
                 tri.v1 = _collider.transform.TransformPoint(tri.v1);
                 tri.v2 = _collider.transform.TransformPoint(tri.v2);   
 
+                Gizmos.color = Color.blanchedAlmond;
+                Gizmos.DrawSphere(Geometry.PointToPlaneProjection(transform.right, transform.position, triCenter), debugRadius * 0.5f);
+
                 pList = new Vector3[] { tri.v0, tri.v1, tri.v2 };
 
                 Gizmos.color = Color.blue;
@@ -87,7 +90,10 @@ namespace Arielado {
                 Gizmos.DrawWireSphere(i0, debugRadius);
                 Gizmos.DrawWireSphere(i1, debugRadius);
 
-                int neighbour = StepTowardsCircle(triIndex, triCenter);
+                Gizmos.color = Color.plum;
+                Gizmos.DrawSphere(Geometry.PointToPlaneProjection(transform.right, transform.position, triCenter), debugRadius * 0.5f);
+
+                int neighbour = StepTowardsCircle(triIndex, triCenter, tri.normal);
                 
                 tri = Triangle.Transform(graph.triangles[neighbour], _collider.transform);
                 triCenter = (tri.v0 + tri.v1 + tri.v2) / 3;
@@ -117,6 +123,9 @@ namespace Arielado {
 
                     Gizmos.color = i1Intersects ? Color.yellow : Color.red;
                     Gizmos.DrawWireSphere(i1, debugRadius * 0.5f);
+
+                    Gizmos.color = Color.black;
+                    Gizmos.DrawSphere(Geometry.PointToPlaneProjection(transform.right, transform.position, triCenter), debugRadius * 0.5f);
                 }
             }
 
@@ -128,63 +137,8 @@ namespace Arielado {
                 Gizmos.color = Color.darkBlue;
                 Gizmos.DrawLineStrip(points.ToArray(), false);
                 Gizmos.DrawSphere(points[i], debugRadius * 0.5f);
-                
-                Handles.Label(points[i] + transform.up * 0.1f, (i + 1).ToString() + "|" + points.Count.ToString());
             }
         }
-
-        /*private void OnDrawGizmosSelected() {
-            if (_collider == null || mesh == null) return;
-
-            if (graph.triangles == null || graph.triangles.Length == 0) {
-                string path = Paths.GetPersistentDir(Paths.TRIANGLE_GRAPHS + mesh.name + ".json");
-                if (!File.Exists(path)) { Debug.Log(path + " File doesn't exists!"); return; }
-                graph = JsonUtility.FromJson<MeshTriangleGraph>(File.ReadAllText(path));    
-            }
-
-            Handles.color = Color.blue;
-            Handles.DrawWireDisc(transform.position, transform.right, fingerRadius);
-
-            testTriangle = Mathf.Clamp(testTriangle, 0, graph.triangles.Length-1);
-
-            Triangle tri = Triangle.Transform(graph.triangles[testTriangle], _collider.transform);
-            Vector3 triCenter = (tri.v0 + tri.v1 + tri.v2) / 3f;
-
-            Vector3[] pList = new Vector3[] { tri.v0, tri.v1, tri.v2 };
-
-            Vector3 i0 = Vector3.negativeInfinity;
-            Vector3 i1 = Vector3.negativeInfinity;
-            bool i0Intersects = false;
-            bool i1Intersects = false;
-
-            //////// Step 1: Circle intersects triangle plane ///////////////////////////
-            Vector3 circleTriPlane = Vector3.Cross(tri.normal, transform.right).normalized;
-            Vector3 circleToTriUp = Vector3.Cross(transform.right, circleTriPlane).normalized;
-
-            float normalAngle = Geometry.CirclePointToAngle(Vector3.zero, -tri.normal, transform.right, transform.up);
-            Vector3 anglePoint = Geometry.CirclePointFromAngle(normalAngle, fingerRadius, transform.right, transform.up, transform.position);
-
-            // Intersection line crosses circle vertically towards the triangle plane
-            Vector3 l0 = transform.position + (circleToTriUp * fingerRadius);
-            Vector3 l1 = anglePoint;
-
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawLine(l0, l1);
-
-            bool triPlaneIntersection = Geometry.LinePlaneIntersection(l0, l1, triCenter, -tri.normal, out Vector3 planeIntersection, out float normalizedLinePoint);
-            
-            //////// Step 2: Find the two points on the circle that intersects the triangle plane
-            //if (!triPlaneIntersection) return;
-
-            // Intersection line crosses circle horizontally along the triangle plane
-            Vector3 segment0 = planeIntersection - (circleTriPlane * fingerRadius);
-            Vector3 segment1 = planeIntersection + (circleTriPlane * fingerRadius);
-
-            Geometry.LineCircleIntersection(fingerRadius, transform.position, segment0, segment1, transform.right, transform.up, out i0, out i1);
-
-            Gizmos.color = (i0Intersects || i1Intersects) ? Color.green : Color.red;
-            Gizmos.DrawLineStrip(pList, true);
-        }*/
 
         private int FindCircleIntersectingTriangle(out Triangle wsTri, out Vector3 triCenter) {
             int index = GetClosestTriangleToCircle(out Vector3 closestPointToFinger);
@@ -193,7 +147,7 @@ namespace Arielado {
             triCenter = (wsTri.v0 + wsTri.v1 + wsTri.v2) / 3;
 
             if (!Math.Geometry.CircleTriangleIntersection(wsTri.v0, wsTri.v1, wsTri.v2, triCenter, wsTri.normal, transform.position, transform.up, transform.right, fingerRadius, out Vector3 i0, out Vector3 i1, out bool i0Intersects, out bool i1Intersects)) {
-                index = StepTowardsCircle(index, triCenter);
+                index = StepTowardsCircle(index, triCenter, wsTri.normal);
             }
 
             return index;
@@ -204,18 +158,10 @@ namespace Arielado {
 
             bool canReach = AStarSearch.GetPath(graph, _collider.transform, 0, closestPointToFinger, out List<PathNode> waypoint);
 
-            for (int i = 0; i < waypoint.Count; i++) {
-                Triangle tri = Triangle.Transform(graph.triangles[waypoint[i].index], _collider.transform);
-                Vector3 triCenter = (tri.v0 + tri.v1 + tri.v2) / 3; 
-
-                Gizmos.color = Color.white;
-                Gizmos.DrawWireSphere(triCenter, debugRadius * 0.5f);
-            }
-
             return waypoint[waypoint.Count-1].index;
         }
 
-        private List<Vector3> GetFingerPoints() {
+        public List<Vector3> GetFingerPoints() {
             List<Vector3> points = new List<Vector3>();
 
             int index = FindCircleIntersectingTriangle(out Triangle tri, out Vector3 triCenter);
@@ -242,24 +188,18 @@ namespace Arielado {
                         canStep = visited.Contains(index) ? false : true;
 
                         Gizmos.color = canStep ? Color.black : Color.red;
-                        Gizmos.DrawWireSphere(intersectionPointCenter, debugRadius);
                     } 
                 } 
-
-                Gizmos.color = i0Intersects ? Color.darkBlue : Color.darkOrange;
-                Gizmos.DrawWireSphere(i0, debugRadius);
-
-                Gizmos.color = i1Intersects ? Color.darkBlue : Color.darkOrange;
-                Gizmos.DrawWireSphere(i1, debugRadius);
             }
             
             return points;
         }
 
-
-
-        private int StepTowardsCircle(int nodeIndex, Vector3 triCenter) {
+        private int StepTowardsCircle(int nodeIndex, Vector3 triCenter, Vector3 triNormal) {
             TriangleNode node = graph.triangleNodes[nodeIndex];
+
+            Vector3 projectedPoint  = Geometry.PointToPlaneProjection(transform.right, transform.position, triCenter);
+            Vector3 dirTowardsPlane = (projectedPoint - triCenter).normalized;
 
             float score = -1f;
             TriangleEdge selectedEdge = graph.edges[TriangleNode.GetEdge(node, 0)];
@@ -272,7 +212,7 @@ namespace Arielado {
                 Vector3 center = (p0 + p1) * 0.5f;
                 Vector3 stepDir = (center - triCenter).normalized;
 
-                float dot = Vector3.Dot(stepDir, transform.right);
+                float dot = Vector3.Dot(stepDir, dirTowardsPlane);
 
                 if (dot > score) {
                     score = dot;
