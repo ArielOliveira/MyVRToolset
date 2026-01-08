@@ -57,8 +57,6 @@ namespace Arielado.Graphs {
                 }
             }
 
-            Debug.Log("Reached Goal!");
-
             return true; 
         }
         #endregion
@@ -95,7 +93,11 @@ namespace Arielado.Graphs {
 
                 if (!graph.IsInBounds(current.index)) { Debug.Log("Out of Bounds!"); return false; };
 
-                if (solver.IsDestiny(current.index, goal)) return true;
+                if (solver.IsDestiny(current.index, goal)) {
+                    if (path.Count > 1) path.RemoveAt(path.Count-1);
+
+                    return true;
+                }
 
                 int[] neighbours = graph.GetNodeNeighbours(current.index);
                 for (int i = 0; i < neighbours.Length; i++) {

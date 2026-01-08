@@ -2,11 +2,11 @@ using UnityEngine;
 
 namespace Arielado.Math {
     public static class Geometry {
-        public static Vector3 PointToPlaneProjection(Vector3 pNormal, Vector3 pPoint, Vector3 target) {
+        public static Vector3 PointToPlaneProjection(Vector3 pNormal, Vector3 pPoint, Vector3 target, out float t) {
             Vector3 direction = target - pPoint;
-            float denom = Vector3.Dot(direction, pNormal);
+            t = Vector3.Dot(direction, pNormal);
 
-            return target - (pNormal * denom);
+            return target - (pNormal * t);
         }
 
         public static bool RayPlaneIntersection(Vector3 pNormal, Vector3 pPoint, Vector3 rayOrigin, Vector3 rayDir, out float t) {

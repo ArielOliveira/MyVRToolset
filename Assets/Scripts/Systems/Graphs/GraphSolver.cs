@@ -9,13 +9,16 @@ namespace Arielado.Graphs {
     public interface IGraph {
         public int Size { get; }
         public bool IsInBounds(int node);
-        public bool IsInBounds(Transform reference, Vector3 target);
         public int GetNodeIndex(int node);
+        public bool StepTowards(Transform reference, Vector3 pPos, Vector3 pNormal, Vector3 surfaceDirection, int node, out int stepNode);
+        public bool StepTowards(Transform reference, Vector3 pPos, Vector3 pNormal, Vector3 surfaceDirection, Vector3 referencePoint, int node, out int stepNode);
+        
         Vector3 GetNodeClosestPointToWS(Transform reference, Vector3 target, int node);
         Vector3 GetNodeClosestPointToOS(Vector3 target, int node);
+        Vector3 GetNodeNormalWS(Transform reference, int node);
+        Vector3 GetNodeNormalOS(int node);
         Vector3 GetNodeCenterWS(Transform reference, int node);
         Vector3 GetNodeCenterOS(int node);
-        Vector3 GetClosestPointInBounds(Transform reference, Vector3 target);
 
         int[] GetNodeNeighbours(int node);
         void CopyTo(ref IGraph graph);
@@ -118,7 +121,10 @@ namespace Arielado.Graphs {
         }
 
         public double ComputeH(int from, int goal) {
-            throw new NotImplementedException();
+            Vector3 fromPos = graph.GetNodeCenterWS(reference, from);
+            Vector3 candidateClosestPointToGoal = graph.GetNodeClosestPointToWS(reference, fromPos, goal);
+
+            return Vector3.Distance(candidateClosestPointToGoal, fromPos);
         }
 
         public double ComputeH(int from, Vector3 goal) {

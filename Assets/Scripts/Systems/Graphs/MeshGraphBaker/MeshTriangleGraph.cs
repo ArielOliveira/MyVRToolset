@@ -48,18 +48,16 @@ namespace Arielado.Graphs {
         }
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct MeshTriangleGraph : IGraph {
         public Triangle[] triangles;
         public TriangleNode[] triangleNodes;
         public TriangleEdge[] edges;
-        public Bounds bounds;
 
-        public MeshTriangleGraph(Triangle[] triangles, TriangleNode[] triangleNodes, TriangleEdge[] edges, Bounds bounds) {
+        public MeshTriangleGraph(Triangle[] triangles, TriangleNode[] triangleNodes, TriangleEdge[] edges) {
             this.triangles = triangles;
             this.triangleNodes = triangleNodes;
             this.edges = edges;
-            this.bounds = bounds;
         } 
 
         public Vector3 GetNodeClosestPointToWS(Transform reference, Vector3 target, int node) {
@@ -79,6 +77,18 @@ namespace Arielado.Graphs {
             return Triangle.ClosestPointTo(triangles[node], target);
         }
 
+        public Vector3 GetNodeNormalWS(Transform reference, int node) {
+            if (!IsInBounds(node)) return Vector3.negativeInfinity;
+
+            return reference.TransformDirection(triangles[node].normal);
+        }
+
+        public Vector3 GetNodeNormalOS(int node) {
+            if (!IsInBounds(node)) return Vector3.negativeInfinity;
+
+            return triangles[node].normal;
+        }
+
         public Vector3 GetNodeCenterWS(Transform reference, int node) {
             if (reference == null) return Vector3.negativeInfinity;
             if (!IsInBounds(node)) return Vector3.negativeInfinity;
@@ -96,19 +106,44 @@ namespace Arielado.Graphs {
             return (t.v0 + t.v1 + t.v2) / 3f;
         }
 
-        public Vector3 GetClosestPointInBounds(Transform reference, Vector3 target) {
-            
+        public int Size => triangles?.Length ?? 0;
 
-            return Vector3.zero;
+        public bool StepTowards(Transform reference, Vector3 pPos, Vector3 pNormal, Vector3 surfaceDirection, int node, out int stepIndex) {
+            stepIndex = 0;
 
+            return false;
         }
 
-        public int Size => triangles?.Length ?? 0;
+        public bool StepTowards(Transform reference, Vector3 pPos, Vector3 pNormal, Vector3 surfaceDirection, Vector3 referencePoint, int node, out int stepIndex) {
+            TriangleNode triNode = triangleNodes[node];
+            stepIndex = -1;
+
+            float score = -1f;
+            
+            for (int i = 0; i < 3; i++) {
+                TriangleEdge edge = edges[TriangleNode.GetEdge(triNode, i)];
+
+                Vector3 p0 = reference.TransformPoint(edge.line.p0);
+                Vector3 p1 = reference.TransformPoint(edge.line.p1);
+                Vector3 rayDir = reference.TransformDirection(-edge.line.direction);
+                // We're ignoring the line side
+                Vector3 normal = pNormal * Mathf.Sign(Vector3.Dot(rayDir, pNormal));
+                if (Math.Geometry.LinePlaneIntersection(p0, p1, pPos, normal, out Vector3 intersection, out float t)) {
+                    Vector3 dir = (intersection - referencePoint).normalized;
+
+                    float dot = Vector3.Dot(dir, surfaceDirection);
+
+                    if (dot > score) {
+                        score = dot;
+                        stepIndex = edge.triangle0 == node ? edge.triangle1 : edge.triangle0;
+                    }
+                }
+            }
+
+            return score == -1f ? false : true;
+        }
         public bool IsInBounds(int node) =>
             node >= 0 && node < triangles.Length;
-        
-        public bool IsInBounds(Transform reference, Vector3 target) =>
-            bounds.Contains(reference.InverseTransformPoint(target));
 
         public int GetNodeIndex(int node) {
             if (!IsInBounds(node)) return -1;
@@ -123,7 +158,7 @@ namespace Arielado.Graphs {
         }
 
         public void CopyTo(ref IGraph graph) {
-            graph = new MeshTriangleGraph(this.triangles, this.triangleNodes, this.edges, this.bounds);
+            graph = new MeshTriangleGraph(this.triangles, this.triangleNodes, this.edges);
         }
     }
 }

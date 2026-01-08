@@ -105,23 +105,29 @@ namespace Arielado.Graphs {
             MeshTriangleGraph graph = JsonUtility.FromJson<MeshTriangleGraph>(File.ReadAllText(filePath));
 
             if (path.Count > 1) {
-                for (int i = 0; i < path.Count-1; i++) {
+                Vector3 p0 = t.transform.TransformPoint((graph.triangles[path[0].index].v0 + graph.triangles[path[0].index].v1 + graph.triangles[path[0].index].v2) / 3);
+                
+                for (int i = 1; i < path.Count; i++) {
                     Handles.color = Color.blue;
-
-                    Vector3 p0 = t.transform.TransformPoint((graph.triangles[path[i].index].v0 + graph.triangles[path[i].index].v1 + graph.triangles[path[i].index].v2) / 3);
-                    Vector3 p1 = t.transform.TransformPoint((graph.triangles[path[i+1].index].v0 + graph.triangles[path[i+1].index].v1 + graph.triangles[path[i+1].index].v2) / 3);
-
+    
+                    Vector3 p1 = t.transform.TransformPoint((graph.triangles[path[i].index].v0 + graph.triangles[path[i].index].v1 + graph.triangles[path[i].index].v2) / 3);
 
                     Handles.DrawLine(p0, p1);
 
                     Handles.color = Color.yellow;    
                     Handles.DrawWireDisc(p0, Vector3.up, debugGraphicRadius);
                     Handles.DrawWireDisc(p0, Vector3.right, debugGraphicRadius);
+
+                    Handles.color = i == path.Count-1 ? Color.magenta : Color.yellow;    
                     Handles.DrawWireDisc(p1, Vector3.up, debugGraphicRadius);
                     Handles.DrawWireDisc(p1, Vector3.right, debugGraphicRadius);
-                }
+
+                    p0 = p1;
+                }                
             } else {
                 Vector3 p0 = t.transform.TransformPoint((graph.triangles[path[0].index].v0 + graph.triangles[path[0].index].v1 + graph.triangles[path[0].index].v2) / 3);
+
+                Handles.color = Color.magenta;
                 Handles.DrawSolidDisc(p0, Vector3.up, debugGraphicRadius);
             }
         }

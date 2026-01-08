@@ -71,7 +71,7 @@ namespace Arielado {
                 tri.v2 = _collider.transform.TransformPoint(tri.v2);   
 
                 Gizmos.color = Color.blanchedAlmond;
-                Gizmos.DrawSphere(Geometry.PointToPlaneProjection(transform.right, transform.position, triCenter), debugRadius * 0.5f);
+                Gizmos.DrawSphere(Geometry.PointToPlaneProjection(transform.right, transform.position, triCenter, out float t), debugRadius * 0.5f);
 
                 pList = new Vector3[] { tri.v0, tri.v1, tri.v2 };
 
@@ -91,7 +91,7 @@ namespace Arielado {
                 Gizmos.DrawWireSphere(i1, debugRadius);
 
                 Gizmos.color = Color.plum;
-                Gizmos.DrawSphere(Geometry.PointToPlaneProjection(transform.right, transform.position, triCenter), debugRadius * 0.5f);
+                Gizmos.DrawSphere(Geometry.PointToPlaneProjection(transform.right, transform.position, triCenter, out float t), debugRadius * 0.5f);
 
                 int neighbour = StepTowardsCircle(triIndex, triCenter, tri.normal);
                 
@@ -125,7 +125,7 @@ namespace Arielado {
                     Gizmos.DrawWireSphere(i1, debugRadius * 0.5f);
 
                     Gizmos.color = Color.black;
-                    Gizmos.DrawSphere(Geometry.PointToPlaneProjection(transform.right, transform.position, triCenter), debugRadius * 0.5f);
+                    Gizmos.DrawSphere(Geometry.PointToPlaneProjection(transform.right, transform.position, triCenter, out float dist), debugRadius * 0.5f);
                 }
             }
 
@@ -198,7 +198,7 @@ namespace Arielado {
         private int StepTowardsCircle(int nodeIndex, Vector3 triCenter, Vector3 triNormal) {
             TriangleNode node = graph.triangleNodes[nodeIndex];
 
-            Vector3 projectedPoint  = Geometry.PointToPlaneProjection(transform.right, transform.position, triCenter);
+            Vector3 projectedPoint  = Geometry.PointToPlaneProjection(transform.right, transform.position, triCenter, out float t);
             Vector3 dirTowardsPlane = (projectedPoint - triCenter).normalized;
 
             float score = -1f;

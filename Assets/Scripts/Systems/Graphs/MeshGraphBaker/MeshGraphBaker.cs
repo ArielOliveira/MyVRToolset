@@ -166,7 +166,7 @@ namespace Arielado.Graphs {
                                                                edgeToEdgeIndex[edge0], edgeToEdgeIndex[edge1], edgeToEdgeIndex[edge2]);
             }
 
-            MeshTriangleGraph graph = new MeshTriangleGraph(triangles, triangleNodes, edges.ToArray(), _Mesh.bounds);
+            MeshTriangleGraph graph = new MeshTriangleGraph(triangles, triangleNodes, edges.ToArray());
             string graphToJson = JsonUtility.ToJson(graph);
 
             File.WriteAllText(Paths.GetPersistentDir(Paths.TRIANGLE_GRAPHS) + $"{_Mesh.name}.json", graphToJson);
