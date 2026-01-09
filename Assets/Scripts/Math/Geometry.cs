@@ -281,9 +281,9 @@ namespace Arielado.Math {
             Vector3 c3 = LineNearestPoint(p3, p1, point);
 
             // Step 6: Calculate the distance from the point to each of these closest points on the edges
-            float mag1 = Vector3.Distance(point, c1);
-            float mag2 = Vector3.Distance(point, c2);
-            float mag3 = Vector3.Distance(point, c3);
+            float mag1 = (c1 - point).sqrMagnitude;
+            float mag2 = (c2 - point).sqrMagnitude;
+            float mag3 = (c3 - point).sqrMagnitude;
 
             float min = Mathf.Min(mag1, mag2);
             min = Mathf.Min(min, mag3);

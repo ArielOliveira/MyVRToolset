@@ -10,8 +10,7 @@ namespace Arielado.Graphs {
         public int Size { get; }
         public bool IsInBounds(int node);
         public int GetNodeIndex(int node);
-        public bool StepTowards(Transform reference, Vector3 pPos, Vector3 pNormal, Vector3 surfaceDirection, int node, out int stepNode);
-        public bool StepTowards(Transform reference, Vector3 pPos, Vector3 pNormal, Vector3 surfaceDirection, Vector3 referencePoint, int node, out int stepNode);
+        public bool StepTowards(Transform reference, Vector3 pPos, Vector3 pNormal, Vector3 surfaceDirection, Vector3 referencePoint, int node, out int stepNode, out Vector3 point);
         
         Vector3 GetNodeClosestPointToWS(Transform reference, Vector3 target, int node);
         Vector3 GetNodeClosestPointToOS(Vector3 target, int node);
@@ -102,7 +101,7 @@ namespace Arielado.Graphs {
             Vector3 candidateClosestPointToGoal = graph.GetNodeClosestPointToWS(reference, goalPos, to);
 
             g = 1;
-            h = Vector3.Distance(candidateClosestPointToGoal, goalPos);
+            h = (candidateClosestPointToGoal - goalPos).sqrMagnitude;
 
             return g + h;
         }
@@ -111,7 +110,7 @@ namespace Arielado.Graphs {
                                       out double g, out double h) {
             Vector3 candidateClosestPointToGoal = graph.GetNodeClosestPointToWS(reference, goal, to);
             g = 1;
-            h = Vector3.Distance(candidateClosestPointToGoal, goal);
+            h = (candidateClosestPointToGoal - goal).sqrMagnitude; 
 
             double f = g + h;
 
@@ -124,12 +123,12 @@ namespace Arielado.Graphs {
             Vector3 fromPos = graph.GetNodeCenterWS(reference, from);
             Vector3 candidateClosestPointToGoal = graph.GetNodeClosestPointToWS(reference, fromPos, goal);
 
-            return Vector3.Distance(candidateClosestPointToGoal, fromPos);
+            return (candidateClosestPointToGoal - fromPos).sqrMagnitude;
         }
 
         public double ComputeH(int from, Vector3 goal) {
             Vector3 candidateClosestPointToGoal = graph.GetNodeClosestPointToWS(reference, goal, from);
-            return Vector3.Distance(candidateClosestPointToGoal, goal);
+            return (candidateClosestPointToGoal - goal).sqrMagnitude; 
         }
     }
 }

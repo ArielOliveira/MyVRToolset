@@ -108,16 +108,11 @@ namespace Arielado.Graphs {
 
         public int Size => triangles?.Length ?? 0;
 
-        public bool StepTowards(Transform reference, Vector3 pPos, Vector3 pNormal, Vector3 surfaceDirection, int node, out int stepIndex) {
-            stepIndex = 0;
-
-            return false;
-        }
-
-        public bool StepTowards(Transform reference, Vector3 pPos, Vector3 pNormal, Vector3 surfaceDirection, Vector3 referencePoint, int node, out int stepIndex) {
+        public bool StepTowards(Transform reference, Vector3 pPos, Vector3 pNormal, Vector3 surfaceDirection, Vector3 referencePoint, int node, out int stepIndex, out Vector3 point) {
             TriangleNode triNode = triangleNodes[node];
-            stepIndex = -1;
+            point = Vector3.positiveInfinity;
 
+            stepIndex = -1;
             float score = -1f;
             
             for (int i = 0; i < 3; i++) {
@@ -128,6 +123,7 @@ namespace Arielado.Graphs {
                 Vector3 rayDir = reference.TransformDirection(-edge.line.direction);
                 // We're ignoring the line side
                 Vector3 normal = pNormal * Mathf.Sign(Vector3.Dot(rayDir, pNormal));
+
                 if (Math.Geometry.LinePlaneIntersection(p0, p1, pPos, normal, out Vector3 intersection, out float t)) {
                     Vector3 dir = (intersection - referencePoint).normalized;
 
@@ -136,6 +132,7 @@ namespace Arielado.Graphs {
                     if (dot > score) {
                         score = dot;
                         stepIndex = edge.triangle0 == node ? edge.triangle1 : edge.triangle0;
+                        point = intersection;
                     }
                 }
             }

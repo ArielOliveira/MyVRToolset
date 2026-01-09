@@ -184,11 +184,11 @@ namespace Arielado {
                     Vector3 intersectionPointCenter = (i0 + i1) * 0.5f;
                     Vector3 surfaceClockwiseDir = -Vector3.Cross(tri.normal, transform.right);
 
-                    if (StepForward(index, intersectionPointCenter, surfaceClockwiseDir, out index)) {
-                        canStep = visited.Contains(index) ? false : true;
+                    if (graph.StepTowards(_collider.transform, transform.position, transform.right, surfaceClockwiseDir, intersectionPointCenter,  index, out index, out Vector3 point)) {
+                        canStep = visited.Contains(index) || Vector3.Distance(point, transform.position) >= fingerRadius ? false : true;
 
                         Gizmos.color = canStep ? Color.black : Color.red;
-                    } 
+                    }
                 } 
             }
             
@@ -240,6 +240,7 @@ namespace Arielado {
                 Vector3 rayDir = _collider.transform.TransformDirection(-edge.line.direction);
                 // We're ignoring the line side
                 Vector3 pNormal = transform.right * Mathf.Sign(Vector3.Dot(rayDir, transform.right));
+
                 if (Math.Geometry.LinePlaneIntersection(p0, p1, transform.position, pNormal, out Vector3 intersection, out float t)) {
                     Vector3 dir = (intersection - circleTriPoint).normalized;
 

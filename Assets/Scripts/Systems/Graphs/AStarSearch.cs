@@ -110,7 +110,7 @@ namespace Arielado.Graphs {
                             solver.SetNode(candidate.index, new PathNode() { index = candidate.index, parent = current.index, f = fNew, g = gNew, h = hNew } );
 
                             if (openList.ContainsKey(fNew))
-                                openList.Add(fNew + (Random.Range(-1f, 1f) * 0.00001f), candidate.index);
+                                openList.Add(fNew + (Random.Range(0f, 100f) * 0.0000001f), candidate.index);
                             else 
                                 openList.Add(fNew, candidate.index);
                         }
