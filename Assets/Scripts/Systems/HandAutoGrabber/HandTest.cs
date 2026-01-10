@@ -104,7 +104,7 @@ public class HandTest : MonoBehaviour {
             for (int i = 0; i < tracedPoints.Count; i++) {
                 Vector3 point = tracedPoints[i];
 
-                float angle = Geometry.Split180(Geometry.CirclePointToAngle(rootPos, point, right, up));
+                float angle = Geometry.Split180(Geometry.PointToAngle(rootPos, point, right, up));
 
                 Handles.Label(point, angle.ToString("0.00"), style);
 
@@ -142,11 +142,11 @@ public class HandTest : MonoBehaviour {
             Vector3 bot = rootPos - upDiff;
             Vector3 front = rootPos + forwardDiff;
 
-            float topAngle = Geometry.Split180(Geometry.CirclePointToAngle(rootPos, top, right, up));
-            float botAngle = Geometry.Split180(Geometry.CirclePointToAngle(rootPos, bot, right, up));
-            float forwardAngle = Geometry.Split180(Geometry.CirclePointToAngle(rootPos, front, right, up));
+            float topAngle = Geometry.Split180(Geometry.PointToAngle(rootPos, top, right, up));
+            float botAngle = Geometry.Split180(Geometry.PointToAngle(rootPos, bot, right, up));
+            float forwardAngle = Geometry.Split180(Geometry.PointToAngle(rootPos, front, right, up));
 
-            Vector3 testTarget = Geometry.CirclePointFromAngle(fingerTargets[i].angle, fingerData[i].length * fingerTargets[i].length, right, up, rootPos);
+            Vector3 testTarget = Geometry.AngleToPoint(fingerTargets[i].angle, fingerData[i].length * fingerTargets[i].length, right, up, rootPos);
 
             FingerData finger = fingerData[i];
 
@@ -226,12 +226,12 @@ public class HandTest : MonoBehaviour {
                 float angle = 0;
 
                 if (i0Intersects) {
-                    angle = Geometry.Split180(Geometry.CirclePointToAngle(rootPos, i0, right, up));
+                    angle = Geometry.Split180(Geometry.PointToAngle(rootPos, i0, right, up));
                     if (angle > highestAngle) { highestAngle = angle; point = i0; }
                 }
 
                 if (i1Intersects) {
-                    angle = Geometry.Split180(Geometry.CirclePointToAngle(rootPos, i1, right, up));
+                    angle = Geometry.Split180(Geometry.PointToAngle(rootPos, i1, right, up));
                     if (angle > highestAngle) { highestAngle = angle; point = i1; }
                 }
                     
@@ -262,6 +262,10 @@ public class HandTest : MonoBehaviour {
 
     private void OnTriggerExit(Collider other) {
         inTestRange = false;
+    }
+
+    private void SetFingerPosition(int finger, Vector3 target) {
+        
     }
 
     public void SetupHandData() {

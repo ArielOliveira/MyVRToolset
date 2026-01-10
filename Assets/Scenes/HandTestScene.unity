@@ -3900,7 +3900,7 @@ MonoBehaviour:
   fingerTest: 0
   triangleTest: 0
   drawFingerData: 1
-  useTriangleTest: 1
+  useTriangleTest: 0
   inTestRange: 0
 --- !u!135 &1954698582
 SphereCollider:

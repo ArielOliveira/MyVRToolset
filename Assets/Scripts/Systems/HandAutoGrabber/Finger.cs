@@ -43,7 +43,7 @@ public class Finger : MonoBehaviour {
 
             if (generatedTargetAngles.Count == bones.Count) {
                 Gizmos.color = Color.red;
-                Vector3 grabPoint = Geometry.CirclePointFromAngle(generatedTargetAngles[i], circleLength, rootRight, rootUp, root.position);
+                Vector3 grabPoint = Geometry.AngleToPoint(generatedTargetAngles[i], circleLength, rootRight, rootUp, root.position);
                 Gizmos.DrawWireSphere(grabPoint, debugSphereRadius * 2f);
             }
 
@@ -60,10 +60,10 @@ public class Finger : MonoBehaviour {
                 up    = bones[i-1].TransformDirection(up);
             }
 
-            Vector3 target = Geometry.CirclePointFromAngle(refAngles[i], circleLength, rootRight, rootUp, root.position);
-            Vector3 solvedTarget = Geometry.CirclePointFromAngle(lowest, circleLength, rootRight, rootUp, root.position);
-            float alignedAngle = Geometry.CirclePointToAngle(bones[i].position, solvedTarget, right, up);
-            Vector3 alignedPoint = Geometry.CirclePointFromAngle(alignedAngle, boneLengths[i], right, up, bones[i].position);
+            Vector3 target = Geometry.AngleToPoint(refAngles[i], circleLength, rootRight, rootUp, root.position);
+            Vector3 solvedTarget = Geometry.AngleToPoint(lowest, circleLength, rootRight, rootUp, root.position);
+            float alignedAngle = Geometry.PointToAngle(bones[i].position, solvedTarget, right, up);
+            Vector3 alignedPoint = Geometry.AngleToPoint(alignedAngle, boneLengths[i], right, up, bones[i].position);
 
             solvedAngles[i] = alignedAngle;
 
@@ -107,7 +107,7 @@ public class Finger : MonoBehaviour {
             if (dist >= boneLengths[j]) {
                 Debug.Log("Adding target to bone: " + j);
 
-                generatedTargetAngles.Add(Geometry.CirclePointToAngle(root.position, points[i], rootRight, rootUp));
+                generatedTargetAngles.Add(Geometry.PointToAngle(root.position, points[i], rootRight, rootUp));
                 
                 originPoint = points[i];
                 j++;

@@ -80,12 +80,12 @@ namespace Arielado {
             Gizmos.color = Color.saddleBrown;
             Gizmos.DrawSphere(circleTestPos + point, debugRadius);
 
-            float upAngle = Split180(Geometry.CirclePointToAngle(circleTestPos, circleTestPos + circleUp, circleNormal, circleUp));
-            float downAngle = Split180(Geometry.CirclePointToAngle(circleTestPos, circleTestPos - circleUp, circleNormal, circleUp));
-            float forwardAngle = Split180(Geometry.CirclePointToAngle(circleTestPos, circleTestPos + circleForward, circleNormal, circleUp));
-            float backAngle = Split180(Geometry.CirclePointToAngle(circleTestPos, circleTestPos - circleForward, circleNormal, circleUp));
-            float testAngle = Split180(Geometry.CirclePointToAngle(circleTestPos, circleTestPos + point, circleNormal, circleUp));
-            float closestPointAngle = Split180(Geometry.CirclePointToAngle(circleTestPos, closest, circleNormal,  circleUp));
+            float upAngle = Split180(Geometry.PointToAngle(circleTestPos, circleTestPos + circleUp, circleNormal, circleUp));
+            float downAngle = Split180(Geometry.PointToAngle(circleTestPos, circleTestPos - circleUp, circleNormal, circleUp));
+            float forwardAngle = Split180(Geometry.PointToAngle(circleTestPos, circleTestPos + circleForward, circleNormal, circleUp));
+            float backAngle = Split180(Geometry.PointToAngle(circleTestPos, circleTestPos - circleForward, circleNormal, circleUp));
+            float testAngle = Split180(Geometry.PointToAngle(circleTestPos, circleTestPos + point, circleNormal, circleUp));
+            float closestPointAngle = Split180(Geometry.PointToAngle(circleTestPos, closest, circleNormal,  circleUp));
 
             GUIStyle style = new GUIStyle();
             style.normal.textColor = Color.white;
@@ -133,8 +133,8 @@ namespace Arielado {
                 i0Color = i0Intersects ? Color.yellowGreen : Color.orange;
                 i1Color = i1Intersects ? Color.yellowGreen : Color.red;
 
-                float angle0 = Split180(Geometry.CirclePointToAngle(circleTestPos, i0, circleNormal, circleUp));
-                float angle1 = Split180(Geometry.CirclePointToAngle(circleTestPos, i1, circleNormal, circleUp));
+                float angle0 = Split180(Geometry.PointToAngle(circleTestPos, i0, circleNormal, circleUp));
+                float angle1 = Split180(Geometry.PointToAngle(circleTestPos, i1, circleNormal, circleUp));
 
                 float dot0   = Vector3.Dot(circleForward, (i0 - selectedPoint).normalized);
                 float dot1   = Vector3.Dot(circleForward, (i1 - selectedPoint).normalized);

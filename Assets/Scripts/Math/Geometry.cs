@@ -296,7 +296,7 @@ namespace Arielado.Math {
                 return c3;
         }
 
-         public static float CirclePointToAngle(Vector3 origin, Vector3 target, Vector3 right, Vector3 up) {
+         public static float PointToAngle(Vector3 origin, Vector3 target, Vector3 right, Vector3 up) {
             Vector3 centerToPoint = (origin - target).normalized;
 
             Quaternion rot = Quaternion.LookRotation(right, up);
@@ -311,7 +311,7 @@ namespace Arielado.Math {
             return theta % 360f;
         }
 
-        public static Vector3 CirclePointFromAngle(float angle, float radius, Vector3 right, Vector3 up) {
+        public static Vector3 AngleToPoint(float angle, float radius, Vector3 right, Vector3 up) {
             Quaternion rot = Quaternion.LookRotation(right, up);
             Matrix4x4 rotationMat = Matrix4x4.Rotate(rot);
 
@@ -327,8 +327,8 @@ namespace Arielado.Math {
             return P;
         }
 
-        public static Vector3 CirclePointFromAngle(float angle, float radius, Vector3 right, Vector3 up, Vector3 origin) =>
-             origin + CirclePointFromAngle(angle, radius, right, up);
+        public static Vector3 AngleToPoint(float angle, float radius, Vector3 right, Vector3 up, Vector3 origin) =>
+             origin + AngleToPoint(angle, radius, right, up);
 
         public static float Split180(float angle) =>
             angle > 180f ? (angle - 180f) * -1 : angle;
@@ -345,8 +345,8 @@ namespace Arielado.Math {
             Vector3 circleTriPlane = Vector3.Cross(triNormal, cRight).normalized;
             Vector3 circleToTriUp = Vector3.Cross(cRight, circleTriPlane).normalized;
 
-            float normalAngle = CirclePointToAngle(Vector3.zero, -triNormal, cRight, cUp);
-            Vector3 anglePoint = CirclePointFromAngle(normalAngle, radius, cRight, cUp, cPos);
+            float normalAngle = PointToAngle(Vector3.zero, -triNormal, cRight, cUp);
+            Vector3 anglePoint = AngleToPoint(normalAngle, radius, cRight, cUp, cPos);
 
             // Intersection line crosses circle vertically towards the triangle plane
             Vector3 l0 = cPos + (circleToTriUp * radius);
