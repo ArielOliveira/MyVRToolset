@@ -8,6 +8,8 @@ using Arielado.Math;
 using UnityEditor;
 using UnityEngine;
 using Arielado.Math.Primitives;
+using RootMotion.FinalIK;
+
 
 [ExecuteAlways,
  RequireComponent(typeof(SphereCollider))]
@@ -18,11 +20,13 @@ public class HandTest : MonoBehaviour {
         [ReadOnly] public Quaternion[] boneRotations;
         [ReadOnly] public float[] boneLengths;
         [ReadOnly] public float length;
+        [ReadOnly] public int fingerIndex;
     }
 
     [Serializable]
     public struct FingerReferenceData {
         public Transform root, tip;
+        public int fingerIndex;
     }
 
     public struct PointAngle {
@@ -36,6 +40,8 @@ public class HandTest : MonoBehaviour {
         [Range(180, 0)] public float angle;
     }
 
+    [SerializeField] private FingerRig fingerRig;
+
     [SerializeField] private Transform palm;
     [SerializeField] private FingerReferenceData[] fingers;
 
@@ -43,8 +49,8 @@ public class HandTest : MonoBehaviour {
     [SerializeField] private FingerTarget[] fingerTargets;
     [SerializeField, ReadOnly] private Vector3 palmSize;
     [SerializeField] private float debugRadius = 0.05f;
-    [SerializeField] private int fingerTest = 0, triangleTest = 0;
-    [SerializeField] private bool drawFingerData, useTriangleTest;
+    [SerializeField] private int fingerTest = 0, triangleTest = 0, stepTowardsTest = 0;
+    [SerializeField] private bool drawFingerData, useTriangleTest, testAllFingers;
     [SerializeField, ReadOnly] private bool inTestRange;
 
     private SkinnedMeshRenderer _renderer;
@@ -52,7 +58,7 @@ public class HandTest : MonoBehaviour {
 
     private Collider grabbable;
     private IGraph graph;
-    private int lastPalmTriangle, stepNode; 
+    [SerializeField, ReadOnly] private int lastPalmTriangle, stepNode, lastStepForward, currentTestStepForward; 
     private int[] lastFingerRootTriangles;
 
     private void Awake() {
@@ -65,7 +71,7 @@ public class HandTest : MonoBehaviour {
         UpdateIntersectionPoints();
     }
 
-    private void OnDrawGizmosSelected() {
+    private void OnDrawGizmos() {
         DrawFingerData();
 
         Gizmos.color = Color.blue;
@@ -90,33 +96,68 @@ public class HandTest : MonoBehaviour {
         style.normal.textColor = Color.yellow;
         style.fontSize = 18;
 
-        Handles.color = Color.yellow;
-        Handles.DrawWireDisc(pPos, pNormal, fingerData[fingerTest].length);
+        if (testAllFingers) {
+            for (int i = 0; i < fingers.Length; i++) {
+                Handles.color = Color.yellow;
+                Handles.DrawWireDisc(pPos, pNormal, fingerData[i].length);
 
-        if (GetFingerPoint(fingerTest, useTriangleTest ? triangleTest : lastPalmTriangle, out Vector3 grabPoint, out List<Vector3> tracedPoints)) {
-            Transform root = fingerData[fingerTest].bones[0];
-            Quaternion offsetRot = root.rotation * Quaternion.Euler(90, 0, 0);
-            
-            Vector3 rootPos = root.position;
-            Vector3 right = offsetRot * -Vector3.right;
-            Vector3 up    = offsetRot * Vector3.up;
+                if (GetFingerPoint(i, useTriangleTest ? triangleTest : lastPalmTriangle, out Vector3 grabPoint, out List<Vector3> tracedPoints)) {
+                    Transform root = fingerData[i].bones[0];
 
-            for (int i = 0; i < tracedPoints.Count; i++) {
-                Vector3 point = tracedPoints[i];
+                    Quaternion offsetRot = root.parent.rotation * fingerData[i].boneRotations[0] * Quaternion.Euler(90, 0, 0);
+                
+                    Vector3 rootPos = root.position;
+                    Vector3 right = offsetRot * -Vector3.right;
+                    Vector3 up    = offsetRot * Vector3.up;
 
-                float angle = Geometry.Split180(Geometry.PointToAngle(rootPos, point, right, up));
+                    for (int j = 0; j < tracedPoints.Count; j++) {
+                        Vector3 point = tracedPoints[j];
 
-                Handles.Label(point, angle.ToString("0.00"), style);
+                        float angle = Geometry.Split180(Geometry.PointToAngle(rootPos, point, right, up));
 
-                Gizmos.color = Color.blue;
-                Gizmos.DrawSphere(point, debugRadius * 0.5f);
-            }
+                        Handles.Label(point, angle.ToString("0.00"), style);
 
-            Gizmos.color = Color.blue;
-            Gizmos.DrawLineStrip(tracedPoints.ToArray(), false);
+                        Gizmos.color = Color.blue;
+                        Gizmos.DrawSphere(point, debugRadius * 0.5f);
+                    }
 
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawSphere(grabPoint, debugRadius);
+                    Gizmos.color = Color.blue;
+                    Gizmos.DrawLineStrip(tracedPoints.ToArray(), false);
+
+                    Gizmos.color = Color.magenta;
+                    Gizmos.DrawSphere(grabPoint, debugRadius);
+                }
+            } 
+        } else {
+            Handles.color = Color.yellow;
+            Handles.DrawWireDisc(pPos, pNormal, fingerData[fingerTest].length);
+
+            if (GetFingerPoint(fingerTest, useTriangleTest ? triangleTest : lastPalmTriangle, out Vector3 grabPoint, out List<Vector3> tracedPoints)) {
+                    Transform root = fingerData[fingerTest].bones[0];
+
+                   Quaternion offsetRot = root.parent.rotation * fingerData[fingerTest].boneRotations[0] * Quaternion.Euler(90, 0, 0);
+                
+                    Vector3 rootPos = root.position;
+                    Vector3 right = offsetRot * -Vector3.right;
+                    Vector3 up    = offsetRot * Vector3.up;
+
+                    for (int i = 0; i < tracedPoints.Count; i++) {
+                        Vector3 point = tracedPoints[i];
+
+                        float angle = Geometry.Split180(Geometry.PointToAngle(rootPos, point, right, up));
+
+                        Handles.Label(point, angle.ToString("0.00"), style);
+
+                        Gizmos.color = Color.blue;
+                        Gizmos.DrawSphere(point, debugRadius * 0.5f);
+                    }
+
+                    Gizmos.color = Color.blue;
+                    Gizmos.DrawLineStrip(tracedPoints.ToArray(), false);
+
+                    Gizmos.color = Color.magenta;
+                    Gizmos.DrawSphere(grabPoint, debugRadius);
+                }       
         }
     }
 
@@ -129,7 +170,7 @@ public class HandTest : MonoBehaviour {
 
         for (int i = 0; i < fingerData.Length; i++) {
             Transform root = fingerData[i].bones[0];
-            Quaternion offsetRot = root.rotation * Quaternion.Euler(90, 0, 0);
+            Quaternion offsetRot = root.parent.rotation * fingerData[i].boneRotations[0] * Quaternion.Euler(90, 0, 0);
             
             Vector3 rootPos = root.position;
             Vector3 right = offsetRot * -Vector3.right;
@@ -156,6 +197,9 @@ public class HandTest : MonoBehaviour {
 
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(testTarget, debugRadius);
+
+            Handles.color = Color.yellow;
+            Handles.DrawWireDisc(rootPos, right, fingerData[i].length);
         }
     }
 
@@ -190,6 +234,17 @@ public class HandTest : MonoBehaviour {
 
         Vector3 surfaceNormal = graph.GetNodeNormalWS(grabbable.transform, lastPalmTriangle);
         Vector3 surfaceDir    = -Vector3.Cross(surfaceNormal, palm.forward);        
+        
+        /*for (int i = 0; i < fingers.Length; i++) {
+            if (GetFingerPoint(i, lastPalmTriangle, out Vector3 grabPoint, out List<Vector3> tracedPoints)) {
+                int fingerIndex = fingerData[i].fingerIndex;
+            
+                if (fingerIndex >= 0 && tracedPoints?.Count > 0) {
+                    fingerRig.fingers[fingerIndex].target.position = grabPoint;
+                }   
+            }    
+        }*/
+        
     }
 
     private bool GetFingerPoint(int finger, int startStep, out Vector3 point, out List<Vector3> points) {
@@ -203,7 +258,7 @@ public class HandTest : MonoBehaviour {
         float highestAngle = float.NegativeInfinity;
 
         Transform root = fingerData[finger].bones[0];
-        Quaternion offsetRot = root.rotation * Quaternion.Euler(90, 0, 0);
+        Quaternion offsetRot = root.parent.rotation * fingerData[finger].boneRotations[0] * Quaternion.Euler(90, 0, 0);
             
         Vector3 rootPos = root.position;
         Vector3 right = offsetRot * -Vector3.right;
@@ -235,11 +290,11 @@ public class HandTest : MonoBehaviour {
                     if (angle > highestAngle) { highestAngle = angle; point = i1; }
                 }
                     
-                Vector3 intersectionPointCenter = (i0 + i1) * 0.5f;
+                //Vector3 intersectionPointCenter = (i0 + i1) * 0.5f;
                 Vector3 surfaceClockwiseDir = -Vector3.Cross(tri.normal, -right);
 
-                if (graph.StepTowards(grabbable.transform, rootPos, -right, surfaceClockwiseDir, intersectionPointCenter, currentStep, out currentStep, out Vector3 intersection)) {
-                    step = currentStep == startStep || Vector3.Distance(intersection, rootPos) >= radius ? false : true;
+                if (graph.StepTowards(grabbable.transform, rootPos, -right, surfaceClockwiseDir, triCenter, currentStep, out currentStep, out Vector3 intersection)) {
+                    step = (currentStep != startStep) && Vector3.Distance(intersection, rootPos) < radius;
                 }
             }
         }
@@ -262,10 +317,6 @@ public class HandTest : MonoBehaviour {
 
     private void OnTriggerExit(Collider other) {
         inTestRange = false;
-    }
-
-    private void SetFingerPosition(int finger, Vector3 target) {
-        
     }
 
     public void SetupHandData() {
@@ -329,6 +380,7 @@ public class HandTest : MonoBehaviour {
             List<Quaternion> boneRotations = new List<Quaternion>();
             List<float> boneLengths = new List<float>();
 
+
             Transform probe = frd.root;
 
             fingerTargets[i] = new FingerTarget() { length = 1, angle = 90};
@@ -337,7 +389,7 @@ public class HandTest : MonoBehaviour {
             float length = 0;
 
             while (probe != null && probe != frd.tip) {
-                Vector3 euler = probe.localRotation.eulerAngles;
+                Vector3 euler = probe.localEulerAngles;
                 boneRotations.Add(Quaternion.Euler(0, euler.y, euler.z));
 
                 Transform child = probe.GetChild(0);
@@ -354,7 +406,8 @@ public class HandTest : MonoBehaviour {
                 bones         = bones.ToArray(),
                 boneRotations = boneRotations.ToArray(),
                 boneLengths   = boneLengths.ToArray(),
-                length        = length
+                length        = length,
+                fingerIndex   = frd.fingerIndex
             };
         }
     }

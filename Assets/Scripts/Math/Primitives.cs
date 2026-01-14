@@ -46,6 +46,15 @@ namespace Arielado.Math.Primitives {
             normal = normalScaled.normalized;
         }
 
+        public Triangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 normalScaled, Vector3 normal) {
+            this.v0 = v0;
+            this.v1 = v1;
+            this.v2 = v2;
+
+            this.normalScaled = normalScaled;
+            this.normal = normal;
+        }
+
         public static bool Intersects(Vector3 origin, Vector3 dir, 
                                       Triangle tri,
                                       out TriangleIntersectionData intersection) {
@@ -66,7 +75,9 @@ namespace Arielado.Math.Primitives {
         public static Triangle Transform(Triangle tri, Transform transform) =>
             new Triangle(transform.TransformPoint(tri.v0),
                          transform.TransformPoint(tri.v1),
-                         transform.TransformPoint(tri.v2));
+                         transform.TransformPoint(tri.v2),
+                         transform.TransformPoint(tri.normalScaled),
+                         transform.TransformDirection(tri.normal));
     }
 
     public struct TriangleIntersectionData {
