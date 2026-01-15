@@ -16,9 +16,9 @@ public class FromToRotations : MonoBehaviour {
         style.normal.textColor = Color.white;
         style.fontSize = 18;
 
-        Vector3 coneVector = p1.position - p0.position;
+        Vector3 coneVector = (p1.position - p0.position);
 
-        Vector3 goalPos = target.position - p0.position;
+        Vector3 goalPos = target.position - p1.position;
 
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(goalPos, 0.05f);
@@ -26,7 +26,7 @@ public class FromToRotations : MonoBehaviour {
         Gizmos.color = Color.white;
         Gizmos.DrawLine(p0.position, p1.position);
 
-        Matrix4x4 rotor = Matrix4x4.TRS(p0.position, Quaternion.LookRotation(coneVector), Vector3.one);
+        Matrix4x4 rotor = Matrix4x4.TRS(p0.position, Quaternion.LookRotation(coneVector.normalized), Vector3.one);
         float dot = Vector3.Dot(coneVector, goalPos) / coneVector.magnitude;
         Vector3 projected = coneVector.normalized * dot;
 
@@ -48,8 +48,8 @@ public class FromToRotations : MonoBehaviour {
 
         float projMagnitude = projected.magnitude;
 
-        float xAspect = Vector3.Dot(pPos, rightVec);
-        float yAspect = Vector3.Dot(pPos, upVec);
+        float xAspect = Vector3.Dot(pPos, rightVec) * Mathf.Sign(Vector3.Dot(ri, rightVec));
+        float yAspect = Vector3.Dot(pPos, upVec) * Mathf.Sign(Vector3.Dot(top, upVec));
 
         float topDist = (pUp - goalPos).magnitude;
         float botDist = (pDown - goalPos).magnitude;
@@ -67,28 +67,36 @@ public class FromToRotations : MonoBehaviour {
         float ellipse = ((xAspect*xAspect)/(xBound*xBound)) + ((yAspect*yAspect)/(yBound*yBound));
         bool inBounds = ellipse <= 1 && dot >= 0;
 
-        Vector3 upConstr   = pPos + (top * up);
-        Vector3 downConstr = pPos + (top * down);
-        Vector3 lConstr    = pPos + (ri  * left);
-        Vector3 rConstr    = pPos + (ri  * right);
+        Vector3 result = goalPos;
 
-        Vector3 selectedUp = pPos + upVec;
-        Vector3 selectedRight = pPos + rightVec;
+        if (!inBounds) {
+            float a = Mathf.Atan2(yAspect, xAspect);
+            float x = xBound * Mathf.Cos(a);
+            float y = yBound * Mathf.Sin(a);
+
+            result = (projected + rightVec * x + upVec * y).normalized * goalPos.magnitude;
+        }
+
+        Vector3 upConstr   = p0.position + (top * up);
+        Vector3 downConstr = p0.position + (top * down);
+        Vector3 lConstr    = p0.position + (ri  * left);
+        Vector3 rConstr    = p0.position + (ri  * right);
+
+        Vector3 selectedUp = p0.position + upVec;
+        Vector3 selectedRight = p0.position + rightVec;
 
         Vector3[] verts = new Vector3[] {
-            pPos + ((top - ri)),
-            pPos + ((top + ri)),
-            pPos + ((-top + ri)),
-            pPos + ((-top - ri))
+            p0.position + ((top - ri)),
+            p0.position + ((top + ri)),
+            p0.position + ((-top + ri)),
+            p0.position + ((-top - ri))
         };
-
-        Vector3 result = goalPos;
 
         Handles.DrawSolidRectangleWithOutline(verts, new Color(Color.aquamarine.r, Color.aquamarine.g, Color.aquamarine.b, 0.1f), inBounds ? Color.darkBlue : Color.darkRed);
 
         style.normal.textColor = Color.white;
-        Handles.Label(pPos + top * 1.6f, "dot: " + dot.ToString("0.00"), style);
-        Handles.Label(pPos + top * 1.4f, "ellipse: " + ellipse.ToString("0.00"), style);
+        Handles.Label(p0.position + top * 1.6f, "dot: " + dot.ToString("0.00"), style);
+        Handles.Label(p0.position + top * 1.4f, "ellipse: " + ellipse.ToString("0.00"), style);
 
         style.normal.textColor = Color.green;
         //Handles.Label(pUp, topDist.ToString("0.00"), style);
@@ -112,7 +120,7 @@ public class FromToRotations : MonoBehaviour {
         Handles.Label(lConstr, left.ToString("0.00"), style);
 
         Gizmos.color = Color.green;
-        Gizmos.DrawLine(pPos, pPos + top);
+        Gizmos.DrawLine(p0.position, p0.position + top);
         Gizmos.DrawSphere(selectedUp, 0.05f);
         Gizmos.DrawWireSphere(upConstr, 0.05f);
 
@@ -120,20 +128,20 @@ public class FromToRotations : MonoBehaviour {
         //Gizmos.DrawWireSphere(selectedUp, 0.1f);
 
         Gizmos.color = Color.darkGreen;
-        Gizmos.DrawLine(pPos, pPos - top);
+        Gizmos.DrawLine(p0.position, p0.position - top);
         Gizmos.DrawWireSphere(downConstr, 0.05f);
 
         Gizmos.color = Color.darkRed;
-        Gizmos.DrawLine(pPos, pPos + ri);
+        Gizmos.DrawLine(p0.position, p0.position + ri);
         Gizmos.DrawSphere(selectedRight, 0.05f);
         Gizmos.DrawWireSphere(rConstr, 0.05f);
 
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(pPos, pPos - ri);
+        Gizmos.DrawLine(p0.position, p0.position - ri);
         Gizmos.DrawWireSphere(lConstr, 0.05f);
 
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(result, 0.1f);
+        Gizmos.DrawWireSphere(p0.position + result, 0.1f);
     }
 
 

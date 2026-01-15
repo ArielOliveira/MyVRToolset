@@ -30,25 +30,23 @@ namespace Arielado.FABRIK {
             Vector3 projected = coneVector.normalized * dot;
             
             Vector3 top = rotor * Vector3.up;
-            Vector3 bot = rotor * Vector3.down;
-            Vector3 l   = rotor * Vector3.left;
-            Vector3 r   = rotor * Vector3.right;
+            Vector3 ri = rotor * Vector3.right;
 
-            Vector3 upVec    = (top - position).magnitude < (bot - position).magnitude ? top : bot;
-            Vector3 rightVec = (l - position).magnitude < (r - position).magnitude ? l : r;
+            Vector3 upVec    = (top - position).magnitude < (-top - position).magnitude ? top : -top;
+            Vector3 rightVec = (ri - position).magnitude < (-ri - position).magnitude ? ri : -ri;
 
             Vector3 adjust = position - projected;
             if (dot < 0) projected = -projected;
 
-            float xAspect = Vector3.Dot(adjust, rightVec);
-            float yAspect = Vector3.Dot(adjust, upVec);
+            float xAspect = Vector3.Dot(adjust, rightVec) * Mathf.Sign(Vector3.Dot(ri, rightVec));
+            float yAspect = Vector3.Dot(adjust, upVec) * Mathf.Sign(Vector3.Dot(top, upVec));
 
             float projMagnitude = projected.magnitude;
 
-            float left  = -(projMagnitude * Mathf.Tan(1f * Mathf.Deg2Rad));
-            float right =   projMagnitude * Mathf.Tan(90f * Mathf.Deg2Rad);
-            float up    =   projMagnitude * Mathf.Tan(90f * Mathf.Deg2Rad);
-            float down  = -(projMagnitude * Mathf.Tan(90f * Mathf.Deg2Rad));
+            float left  = -(projMagnitude * Mathf.Tan(89f * Mathf.Deg2Rad));
+            float right =   projMagnitude * Mathf.Tan(89f * Mathf.Deg2Rad);
+            float up    =   projMagnitude * Mathf.Tan(89f * Mathf.Deg2Rad);
+            float down  = -(projMagnitude * Mathf.Tan(89f * Mathf.Deg2Rad));
 
             float xBound = xAspect >= 0 ? right : left;
             float yBound = yAspect >= 0 ? up : down;
@@ -76,13 +74,19 @@ namespace Arielado.FABRIK {
                 for (int i = 0; i < ITERATIONS && !IsWithinReach(ref chain, target); i++) {
                     // Set tip to target and propagate displacement to rest of chain
                     chain.positions[chain.positions.Length-1] = target.position;
-                    for (int j = chain.positions.Length - 2; j > -1; --j)
-                        chain.positions[j] = chain.positions[j + 1] + ((chain.positions[j] - chain.positions[j + 1]).normalized * chain.lengths[j]);
+                    Vector3 coneVec = (chain.positions[chain.positions.Length-2] - chain.positions[chain.positions.Length-1]).normalized;
+                    for (int j = chain.positions.Length - 2; j > -1; --j) {
+                        Vector3 goalPos = chain.positions[j + 1] + ((chain.positions[j] - chain.positions[j + 1]).normalized * chain.lengths[j]);
+                        Matrix4x4 rotor = Matrix4x4.TRS(chain.positions[j+1], Quaternion.LookRotation(chain.positions[j+1] + coneVec), Vector3.one);
+                        Vector3 t = Constrain(ref chain, goalPos - chain.positions[j+1], coneVec, rotor, j);
+                        chain.positions[j] = chain.positions[j+1] + t;
+                        coneVec = chain.positions[j] - chain.positions[j+1];
+                    }
 
                     // Backward reaching phase
                     // Set root back at it's original position and propagate displacement to rest of chain
                     chain.positions[0] = chain.origin;
-                    Vector3 coneVec = (chain.positions[1] - chain.positions[0]).normalized;
+                    coneVec = (chain.positions[1] - chain.positions[0]).normalized;
                     for (int j = 1; j < chain.positions.Length; ++j) {
                         
                         Vector3 goalPos = chain.positions[j - 1] + ((chain.positions[j] - chain.positions[j - 1]).normalized * chain.lengths[j - 1]);

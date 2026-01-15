@@ -290,7 +290,6 @@ public class HandTest : MonoBehaviour {
                     if (angle > highestAngle) { highestAngle = angle; point = i1; }
                 }
                     
-                //Vector3 intersectionPointCenter = (i0 + i1) * 0.5f;
                 Vector3 surfaceClockwiseDir = -Vector3.Cross(tri.normal, -right);
 
                 if (graph.StepTowards(grabbable.transform, rootPos, -right, surfaceClockwiseDir, triCenter, currentStep, out currentStep, out Vector3 intersection)) {
